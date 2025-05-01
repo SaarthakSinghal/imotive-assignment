@@ -67,6 +67,14 @@ router.post(
 // Requires user to be authenticated
 router.post("/logout", ensureAuthenticated, logoutHandler);
 
+// Route to get CSRF token
+// GET /api/auth/csrf-token
+// Needs to be accessed by authenticated or unauthenticated users depending on the form
+// For simplicity, we won't protect it with ensureAuthenticated here.
+router.get("/csrf-token", (req, res) => {
+  res.json({ csrfToken: req.csrfToken() });
+});
+
 // TODO: Add Login route
 
 export default router;

@@ -1,6 +1,7 @@
-import express, { Express, Request, Response } from "express";
+import express, { Express, Request, Response, NextFunction } from "express";
 import rateLimit from "express-rate-limit"; // Import rate limiter
 import session from "express-session"; // Import session
+import csurf from "csurf"; // Import csurf
 import { sessionOptions } from "./config/session.config"; // Import session config
 import config from "./config"; // Import centralized config
 import authRoutes from "./routes/auth.routes"; // Import auth routes
@@ -23,6 +24,23 @@ app.use(limiter);
 app.use(session(sessionOptions));
 
 app.use(express.json()); // Middleware to parse JSON bodies
+
+// Apply CSRF protection after session and body parsing
+const csrfProtection = csurf();
+app.use(csrfProtection);
+
+// Optional: Error handler specifically for CSRF errors
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  if (err.code === "EBADCSRFTOKEN") {
+    console.warn(
+      `[CSRF] Invalid CSRF token detected for request: ${req.method} ${req.originalUrl}`
+    );
+    res.status(403).json({ status: "fail", message: "Invalid CSRF token." });
+  } else {
+    // Pass other errors along
+    next(err);
+  }
+});
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Auth System API");
