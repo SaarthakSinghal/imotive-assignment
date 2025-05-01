@@ -82,3 +82,10 @@
   - Updated `enableMfaSetupHandler` and `verifyMfaSetupHandler` to retrieve the authenticated user's ID directly from `req.session.userId` (guaranteed to exist by the `ensureAuthenticated` middleware).
   - Fetched the user's email from the database in `enableMfaSetupHandler` using the session `userId` to include it in the TOTP issuer name.
 - **Security:** Session IDs are stored in secure, httpOnly cookies. Session data (containing `userId`) is stored server-side in the database, reducing exposure compared to storing JWTs in client-side storage. Allows for straightforward server-side session invalidation (logout).
+- **Errors Encountered & Fixes (During Testing):**
+  - **MFA Setup Error (`ERR_CRYPTO_INVALID_KEYLEN`):** The `POST /api/mfa/setup` endpoint failed due to an incorrect `MFA_ENCRYPTION_KEY` length.
+    - **Cause:** The key stored in `.env` was either not exactly 64 hex characters long, or it contained invalid characters (like `<` and `>`). This resulted in `Buffer.from(key, "hex")` returning a buffer of incorrect length (e.g., 0 bytes) instead of the required 32 bytes for AES-256-GCM.
+    - **Fix:** Ensured the `MFA_ENCRYPTION_KEY` in `.env` was a valid 64-character hex string and restarted the server.
+  - **MFA Verify Error (`P2021: Table 'public.BackupCode' does not exist`):** The `POST /api/mfa/verify` endpoint failed because the `BackupCode` table was missing from the database.
+    - **Cause:** Likely synchronization issues between `schema.prisma` (which defined the table) and the actual database state, potentially from an incomplete or failed migration earlier.
+    - **Fix:** Ran `npx prisma db push --force` to align the database schema with `schema.prisma`, creating the missing table. Regenerated Prisma client (`npx prisma generate`) afterwards just in case.

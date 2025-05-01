@@ -190,12 +190,11 @@ const config = {
     "db"
   ],
   "activeProvider": "postgresql",
-  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
         "fromEnvVar": "DATABASE_URL",
-        "value": null
+        "value": "postgresql://saarthak:authpassword@localhost:5433/authdb?schema=public"
       }
     }
   },

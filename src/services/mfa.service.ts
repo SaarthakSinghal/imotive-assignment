@@ -9,7 +9,17 @@ const prisma = new PrismaClient();
 const ALGORITHM = "aes-256-gcm";
 // Key must be 32 bytes for aes-256-gcm
 // Ensure your MFA_ENCRYPTION_KEY in .env is appropriate (e.g., 64 hex chars)
+
+// --- DEBUGGING ---
+// console.log(
+//   `[DEBUG] Raw MFA_ENCRYPTION_KEY from config: '${config.MFA_ENCRYPTION_KEY}' (Length: ${config.MFA_ENCRYPTION_KEY?.length})`
+// );
 const ENCRYPTION_KEY = Buffer.from(config.MFA_ENCRYPTION_KEY, "hex");
+// console.log(
+//   `[DEBUG] Parsed ENCRYPTION_KEY buffer length: ${ENCRYPTION_KEY.byteLength}`
+// );
+// --- END DEBUGGING ---
+
 const IV_LENGTH = 16; // For AES-GCM, IV is typically 12 or 16 bytes. 16 is common.
 const AUTH_TAG_LENGTH = 16;
 

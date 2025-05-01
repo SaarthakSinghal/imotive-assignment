@@ -370,3 +370,31 @@ export const mfaLoginBackupHandler = async (
     return; // Add explicit return
   }
 };
+
+// --- Logout Handler ---
+export const logoutHandler = (req: Request, res: Response) => {
+  // ensureAuthenticated middleware already confirmed user is logged in
+  const sessionId = req.session.id; // For logging purposes
+  const userId = req.session.userId; // For logging purposes
+
+  req.session.destroy((err) => {
+    if (err) {
+      console.error(
+        `[Logout Handler] Session destruction error for user ${userId} (Session ID: ${sessionId}):`,
+        err
+      );
+      // Even if destruction fails, proceed to clear cookie and respond
+      // Optionally return 500, but usually client just needs to know logout was attempted
+    }
+
+    // Clear the session cookie on the client side
+    // Use the same name as configured in sessionOptions (default is 'connect.sid')
+    res.clearCookie("connect.sid"); // TODO: Make cookie name configurable if needed
+
+    console.log(
+      `[Logout Handler] User ${userId} logged out successfully (Session ID: ${sessionId}).`
+    );
+    res.status(200).json({ status: "success", message: "Logout successful" });
+  });
+  // No return needed here as destroy is async with callback
+};

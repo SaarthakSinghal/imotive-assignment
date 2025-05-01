@@ -7,8 +7,10 @@ import {
   resetPasswordHandler,
   mfaLoginHandler,
   mfaLoginBackupHandler,
+  logoutHandler,
 } from "../controllers/auth.controller";
 import { validate } from "../middleware/validate";
+import { ensureAuthenticated } from "../middleware/auth.middleware";
 import {
   registerSchema,
   loginSchema,
@@ -59,6 +61,11 @@ router.post(
   validate(verifyMfaBackupSchema),
   mfaLoginBackupHandler
 );
+
+// Logout route
+// POST /api/auth/logout
+// Requires user to be authenticated
+router.post("/logout", ensureAuthenticated, logoutHandler);
 
 // TODO: Add Login route
 
