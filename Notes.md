@@ -116,3 +116,45 @@ This document outlines the key steps taken and security considerations implement
     - **Fix:** Ran `npx prisma generate` to update the client types based on the new schema.
   - **Express Handler Types:** Adding the `verifyEmailHandler` (an `async` function) caused TypeScript errors in the router (`auth.routes.ts`) because the handler's implicit return type (`Promise<Response | undefined>`) didn't match the expected `Promise<void>`.
     - **Fix:** Modified `verifyEmailHandler` (and others previously) to explicitly use `return;` after sending a response (`res.status(...).json(...)`), ensuring the function signature matches Express's expectations.
+
+### Phase 2.2: Rate Limiting and Abuse Protection
+
+- **Goal:** Protect auth endpoints (and others) from brute-force attacks and general abuse.
+- **Library:** Installed `express-rate-limit` and its types (`@types/express-rate-limit`).
+- **Implementation (`src/index.ts`):**
+  - Configured a basic rate limiter middleware.
+  - **Settings:** Allows 100 requests per IP address within a 15-minute window (`windowMs: 15 * 60 * 1000`, `max: 100`).
+  - Applied the limiter globally (`app.use(limiter)`) before other middleware and routes.
+  - Includes standard rate limit headers (`RateLimit-*`) in responses.
+- **Security:** This initial global limit provides baseline protection. More specific limits can be applied to sensitive endpoints (like login, register, verify) later if needed.
+- **Errors Encountered & Fixes:**
+  - **Missing Types:** After installing `express-rate-limit`, TypeScript showed an error (`Cannot find module 'express-rate-limit' or its corresponding type declarations`).
+    - **Fix:** Installed the necessary type definitions using `npm install --save-dev @types/express-rate-limit`.
+
+### Phase 3.1: Advanced Hashing (Argon2id)
+
+- **Goal:** Enhance password security by switching from bcrypt to Argon2id, which is more resistant to GPU cracking attempts.
+- **Library:** Installed `argon2` (includes types).
+- **Schema Changes (`prisma/schema.prisma`):**
+  - Added `hashingAlgorithm: String @default("argon2")` to the `User` model to track the algorithm used for the `passwordHash`.
+  - Applied changes using `prisma migrate dev --name add_hashing_algo`.
+  - Regenerated Prisma Client (`npx prisma generate`) to update types.
+- **Registration Flow Update (`src/services/auth.service.ts`):**
+  - Modified `registerUser` to use `argon2.hash(password, { type: argon2.argon2id, ... })` instead of `bcrypt.hash()`.
+  - Uses recommended parameters (`memoryCost`, `timeCost`, `parallelism`) for Argon2id. These can be tuned based on server resources and security requirements.
+  - The new user record automatically gets `hashingAlgorithm` set to `'argon2'` (schema default).
+- **Login Flow Update (`src/services/auth.service.ts`):**
+  - Modified `loginUser` to implement progressive rehashing:
+    - Retrieves the user and checks their `hashingAlgorithm`.
+    - If `'argon2'`, uses `argon2.verify(user.passwordHash, password)`.
+    - If not `'argon2'` (assumed bcrypt), uses `bcrypt.compare(user.passwordHash, password)`.
+    - If `bcrypt.compare` succeeds:
+      - Sets a `needsRehash` flag to `true`.
+      - **After successful verification**, if `needsRehash` is true, it hashes the _provided_ password using `argon2.hash()`.
+      - Updates the user's record with the new Argon2 hash and sets `hashingAlgorithm` to `'argon2'`.
+      - Logs the rehash event or any errors during rehashing (errors don't prevent login).
+    - Proceeds with JWT generation if verification (using either method) was successful.
+- **Security:**
+  - Argon2id provides stronger password hashing.
+  - Progressive rehashing ensures older accounts are seamlessly upgraded to the more secure hashing algorithm upon their next successful login, without disrupting users.
+- **Errors Encountered & Fixes:** None significant in this subphase beyond ensuring Prisma Client was regenerated after schema changes.

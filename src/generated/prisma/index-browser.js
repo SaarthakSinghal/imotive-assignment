@@ -124,12 +124,21 @@ exports.Prisma.UserScalarFieldEnum = {
   id: 'id',
   email: 'email',
   passwordHash: 'passwordHash',
+  hashingAlgorithm: 'hashingAlgorithm',
   isVerified: 'isVerified',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
 
 exports.Prisma.VerificationTokenScalarFieldEnum = {
+  id: 'id',
+  token: 'token',
+  expiresAt: 'expiresAt',
+  userId: 'userId',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.PasswordResetTokenScalarFieldEnum = {
   id: 'id',
   token: 'token',
   expiresAt: 'expiresAt',
@@ -150,7 +159,8 @@ exports.Prisma.QueryMode = {
 
 exports.Prisma.ModelName = {
   User: 'User',
-  VerificationToken: 'VerificationToken'
+  VerificationToken: 'VerificationToken',
+  PasswordResetToken: 'PasswordResetToken'
 };
 
 /**
