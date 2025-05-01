@@ -32,6 +32,14 @@ app.use(csrfProtection);
 // Optional: Error handler specifically for CSRF errors
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   if (err.code === "EBADCSRFTOKEN") {
+    // --- DEBUG CSRF ---
+    // console.warn(`[CSRF DEBUG] EBADCSRFTOKEN Error on ${req.method} ${req.originalUrl}`);
+    // console.warn(`             Session ID: ${req.session?.id}`); // Use optional chaining as session might be missing
+    // console.warn(`             CSRF Secret in Session: ${req.session?._csrf}`);
+    // // Log the token received from the client (check common places csurf uses)
+    // const receivedToken = req.body?._csrf || req.query?._csrf || req.headers['x-csrf-token'] || req.headers['csrf-token']; // Add others if needed
+    // console.warn(`             Received Token (from body/query/headers): ${receivedToken}`);
+    // --- END DEBUG ---
     console.warn(
       `[CSRF] Invalid CSRF token detected for request: ${req.method} ${req.originalUrl}`
     );

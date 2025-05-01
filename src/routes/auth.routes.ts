@@ -72,7 +72,14 @@ router.post("/logout", ensureAuthenticated, logoutHandler);
 // Needs to be accessed by authenticated or unauthenticated users depending on the form
 // For simplicity, we won't protect it with ensureAuthenticated here.
 router.get("/csrf-token", (req, res) => {
-  res.json({ csrfToken: req.csrfToken() });
+  const token = req.csrfToken();
+  // --- DEBUG CSRF ---
+  // console.log(`[CSRF DEBUG] GET /csrf-token`);
+  // console.log(`             Session ID: ${req.session.id}`);
+  // console.log(`             CSRF Secret in Session: ${req.session._csrf}`); // Default location where csurf stores the secret
+  // console.log(`             Generated Token: ${token}`);
+  // --- END DEBUG ---
+  res.json({ csrfToken: token });
 });
 
 // TODO: Add Login route

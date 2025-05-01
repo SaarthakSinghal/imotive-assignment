@@ -89,3 +89,36 @@
   - **MFA Verify Error (`P2021: Table 'public.BackupCode' does not exist`):** The `POST /api/mfa/verify` endpoint failed because the `BackupCode` table was missing from the database.
     - **Cause:** Likely synchronization issues between `schema.prisma` (which defined the table) and the actual database state, potentially from an incomplete or failed migration earlier.
     - **Fix:** Ran `npx prisma db push --force` to align the database schema with `schema.prisma`, creating the missing table. Regenerated Prisma client (`npx prisma generate`) afterwards just in case.
+
+### Phase 5.2: Logout Functionality
+
+- **Goal:** Implement a secure endpoint for users to terminate their session.
+- **Route:** Added `POST /api/auth/logout` to `auth.routes.ts`.
+- **Middleware:** Protected the route using the existing `ensureAuthenticated` middleware.
+- \*\*Handler (`logoutHandler` in `auth.controller.ts`):
+  - Calls `req.session.destroy((err) => { ... })` to remove the session data from the PostgreSQL store.
+  - Includes error handling/logging within the `destroy` callback.
+  - Calls `res.clearCookie("connect.sid")` (using the default session cookie name) to instruct the client browser to remove the cookie.
+  - Sends a `200 OK` JSON response `{"status":"success","message":"Logout successful"}`.
+- **Testing:** Confirmed that after logging in, calling `POST /api/auth/logout` successfully terminates the session (subsequent requests to protected routes fail with 401) and clears the client cookie.
+
+### Phase 5.3: CSRF Protection
+
+- **Goal:** Protect against Cross-Site Request Forgery attacks by requiring a unique token for state-changing requests.
+- **Library:** Installed `csurf` and `@types/csurf`.
+- \*\*Middleware Setup (`src/index.ts`):
+  - Imported and applied the `csurf()` middleware globally _after_ `express-session` and `express.json` but _before_ the application routes.
+  - Added a specific error handling middleware to catch `csurf` errors (identified by `err.code === 'EBADCSRFTOKEN'`), log a warning, and return a `403 Forbidden` JSON response.
+- \*\*Token Endpoint (`src/routes/auth.routes.ts`):
+  - Added a `GET /api/auth/csrf-token` endpoint.
+  - This endpoint calls `req.csrfToken()` to generate (or retrieve the existing) CSRF token associated with the current session.
+  - It returns the token in a JSON response: `{"csrfToken": "..."}`.
+  - Augmented the `express-session` `SessionData` interface in `auth.controller.ts` to include the optional `_csrf?: string` property used internally by `csurf`.
+- **Client Requirement:** Clients (frontend/API tools) must now:
+  1. First call `GET /api/auth/csrf-token` to retrieve the token.
+  2. For any subsequent state-changing request (POST, PUT, DELETE, PATCH etc.), include the retrieved token in one of the places `csurf` checks (e.g., the `X-CSRF-Token` header).
+  3. Ensure the session cookie (`connect.sid`) is sent correctly along with both the GET request for the token and the subsequent state-changing request.
+- **Testing & Troubleshooting:**
+  - Confirmed that attempting state-changing requests (like `POST /register`, `POST /login`, `POST /logout`) _without_ a valid CSRF token results in a `403 Forbidden` error.
+  - Confirmed that fetching the token via `GET /api/auth/csrf-token` and then including it in the `X-CSRF-Token` header of a subsequent POST request allows the request to succeed.
+  - Initial testing encountered `403 Forbidden` errors even when the token appeared correct. Troubleshooting revealed the issue was likely related to the API client not correctly sending the `connect.sid` session cookie along with the POST request after obtaining the CSRF token via the GET request. Ensuring proper cookie handling in the client resolved the issue.

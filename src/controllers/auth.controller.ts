@@ -26,6 +26,7 @@ const prisma = new PrismaClient();
 declare module "express-session" {
   interface SessionData {
     userId?: string; // Add userId property to session data
+    _csrf?: string; // Add _csrf property for csurf secret
   }
 }
 // --- End Type Augmentation ---
