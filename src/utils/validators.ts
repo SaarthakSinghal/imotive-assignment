@@ -69,3 +69,43 @@ export const resetPasswordSchema = z.object({
 // });
 
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>["body"];
+
+// Schema for MFA Login Verification step
+export const verifyMfaLoginSchema = z.object({
+  body: z.object({
+    mfaToken: z
+      .string({
+        required_error: "MFA session token is required",
+      })
+      .min(1), // Ensure not empty
+    totpCode: z
+      .string({
+        required_error: "MFA code is required",
+      })
+      .length(6, "MFA code must be 6 digits") // Standard TOTP length
+      .regex(/^[0-9]+$/, "MFA code must contain only digits"),
+  }),
+});
+
+export type VerifyMfaLoginInput = z.infer<typeof verifyMfaLoginSchema>["body"];
+
+// Schema for MFA Backup Code Login step
+export const verifyMfaBackupSchema = z.object({
+  body: z.object({
+    mfaToken: z
+      .string({
+        required_error: "MFA session token is required",
+      })
+      .min(1),
+    backupCode: z
+      .string({
+        required_error: "Backup code is required",
+      })
+      .length(8, "Backup code must be 8 characters") // Match generated length
+      .regex(/^[A-Z0-9]+$/, "Backup code format is invalid"), // Match generated format (uppercase hex)
+  }),
+});
+
+export type VerifyMfaBackupInput = z.infer<
+  typeof verifyMfaBackupSchema
+>["body"];

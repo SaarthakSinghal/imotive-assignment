@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { Session, SessionData } from "express-session";
 import {
   registerUser,
   loginUser,
@@ -11,7 +12,23 @@ import {
   LoginInput,
   ForgotPasswordInput,
   ResetPasswordInput,
+  VerifyMfaLoginInput,
+  VerifyMfaBackupInput,
 } from "../utils/validators";
+import { verifyLoginMfa, verifyBackupCode } from "../services/mfa.service";
+import { PrismaClient } from "../generated/prisma";
+import jwt from "jsonwebtoken";
+import config from "../config";
+
+const prisma = new PrismaClient();
+
+// --- Type Augmentation for Express Session ---
+declare module "express-session" {
+  interface SessionData {
+    userId?: string; // Add userId property to session data
+  }
+}
+// --- End Type Augmentation ---
 
 export const registerHandler = async (
   // Explicitly type req.body using RegisterInput
@@ -46,31 +63,54 @@ export const registerHandler = async (
   }
 };
 
-// Login Handler
+// Updated Login Handler
 export const loginHandler = async (
-  // Explicitly type req.body using LoginInput
   req: Request<{}, {}, LoginInput>,
   res: Response
 ) => {
   try {
-    const token = await loginUser(req.body);
+    // loginUser now returns LoginResult | null
+    const result = await loginUser(req.body);
 
-    if (!token) {
-      // Service returns null for invalid credentials
+    if (!result) {
+      // Service returns null for invalid credentials/unverified user
       res.status(401).json({
         status: "fail",
-        message: "Invalid email or password",
+        message: "Invalid credentials or account not verified.", // Updated message
       });
       return;
     }
 
-    // Send the token back to the client
-    res.status(200).json({
-      status: "success",
-      token,
-    });
+    // Check the status from the service result
+    if (result.status === "success") {
+      // MFA not enabled, establish session
+      req.session.userId = result.userId; // Store userId in session
+      // Optionally save explicitly, though usually automatic on response end
+      // req.session.save();
+
+      res.status(200).json({
+        status: "success",
+        message: "Login successful", // Simple success message
+        // No token returned
+      });
+    } else if (result.status === "mfa_required") {
+      // MFA is required, send back status and MFA pending token
+      res.status(200).json({
+        // Still 200 OK, but indicates next step
+        status: "mfa_required",
+        mfaToken: result.mfaToken,
+      });
+    } else {
+      // Should not happen based on LoginResult type, but handle defensively
+      console.error(
+        "[Login Handler] Unexpected result status from loginUser service"
+      );
+      res
+        .status(500)
+        .json({ status: "error", message: "Internal Server Error" });
+    }
+    return; // Ensure explicit return after handling response
   } catch (error: any) {
-    // Handle potential errors from login service (e.g., config error)
     console.error("Login Error:", error);
     res.status(500).json({
       status: "error",
@@ -169,5 +209,164 @@ export const resetPasswordHandler = async (
     console.error("Reset Password Error:", error);
     res.status(500).json({ status: "error", message: "Internal Server Error" });
     return; // Explicitly return void
+  }
+};
+
+// --- MFA Login Verification Handler ---
+interface MfaPendingJwtPayload {
+  id: string;
+  purpose: "mfa-pending";
+  iat: number;
+  exp: number;
+}
+
+export const mfaLoginHandler = async (
+  // Use VerifyMfaLoginInput for validation
+  req: Request<{}, {}, VerifyMfaLoginInput>,
+  res: Response
+) => {
+  const { mfaToken, totpCode } = req.body;
+
+  try {
+    // 1. Verify the MFA pending token
+    let payload: MfaPendingJwtPayload;
+    try {
+      payload = jwt.verify(mfaToken, config.JWT_SECRET) as MfaPendingJwtPayload;
+      if (payload.purpose !== "mfa-pending") {
+        throw new Error("Invalid token purpose");
+      }
+    } catch (err) {
+      console.warn("[MFA Login] Invalid or expired MFA pending token:", err);
+      res
+        .status(401)
+        .json({ status: "fail", message: "Invalid or expired MFA session." });
+      return; // Explicit return
+    }
+
+    const userId = payload.id;
+
+    // 2. Verify the TOTP code using the MFA service
+    // Service now returns userId on success, null on failure
+    const verifiedUserId = await verifyLoginMfa(userId, totpCode);
+
+    // if (!isTotpValid) {
+    if (!verifiedUserId) {
+      res.status(401).json({ status: "fail", message: "Invalid MFA code." });
+      return; // Explicit return
+    }
+
+    // 3. Code is valid, establish session
+    req.session.userId = verifiedUserId; // Set user ID in session
+
+    /* Remove final JWT generation
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { email: true },
+    });
+    if (!user) {
+      console.error(
+        `[MFA Login] User ${userId} not found after valid MFA pending token.`
+      );
+      res
+        .status(500)
+        .json({ status: "error", message: "Internal Server Error" });
+      return; // Explicit return
+    }
+
+    const finalJwtSecret = config.JWT_SECRET;
+    const finalPayload = { id: userId, email: user.email };
+    const finalToken = jwt.sign(finalPayload, finalJwtSecret, {
+      expiresIn: "1h",
+    });
+    */
+
+    // 4. Send success response
+    res.status(200).json({
+      status: "success",
+      message: "Login successful",
+      // token: finalToken,
+    });
+    return; // Explicit return
+  } catch (error) {
+    console.error("MFA Login Verification Error:", error);
+    res.status(500).json({ status: "error", message: "Internal Server Error" });
+    return; // Explicit return
+  }
+};
+
+// --- MFA Login with Backup Code Handler ---
+export const mfaLoginBackupHandler = async (
+  req: Request<{}, {}, VerifyMfaBackupInput>,
+  res: Response
+) => {
+  const { mfaToken, backupCode } = req.body;
+
+  try {
+    // 1. Verify the MFA pending token
+    let payload: MfaPendingJwtPayload;
+    try {
+      payload = jwt.verify(mfaToken, config.JWT_SECRET) as MfaPendingJwtPayload;
+      if (payload.purpose !== "mfa-pending") {
+        throw new Error("Invalid token purpose");
+      }
+    } catch (err) {
+      console.warn(
+        "[MFA Login Backup] Invalid or expired MFA pending token:",
+        err
+      );
+      res
+        .status(401)
+        .json({ status: "fail", message: "Invalid or expired MFA session." });
+      return; // Add explicit return
+    }
+
+    const userId = payload.id;
+
+    // 2. Verify the Backup Code
+    // Service now returns userId on success, null on failure
+    const verifiedUserId = await verifyBackupCode(userId, backupCode);
+
+    // if (!isBackupCodeValid) {
+    if (!verifiedUserId) {
+      res.status(401).json({ status: "fail", message: "Invalid backup code." });
+      return; // Add explicit return
+    }
+
+    // 3. Backup code is valid, establish session
+    req.session.userId = verifiedUserId; // Set user ID in session
+
+    /* Remove final JWT generation
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { email: true },
+    });
+    if (!user) {
+      console.error(
+        `[MFA Login Backup] User ${userId} not found after valid MFA pending token.`
+      );
+      res
+        .status(500)
+        .json({ status: "error", message: "Internal Server Error" });
+      return; // Add explicit return
+    }
+
+    const finalJwtSecret = config.JWT_SECRET;
+    const finalPayload = { id: userId, email: user.email };
+    const finalToken = jwt.sign(finalPayload, finalJwtSecret, {
+      expiresIn: "1h",
+    });
+    */
+
+    // 4. Send success response
+    res.status(200).json({
+      status: "success",
+      message: "Login successful",
+      // token: finalToken,
+    });
+    return; // Add explicit return
+  } catch (error) {
+    console.error("MFA Backup Code Login Error:", error);
+    res.status(500).json({ status: "error", message: "Internal Server Error" });
+    return; // Add explicit return
   }
 };

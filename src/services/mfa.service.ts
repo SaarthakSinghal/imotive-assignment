@@ -2,6 +2,7 @@ import crypto from "crypto";
 import config from "../config";
 import { PrismaClient } from "../generated/prisma";
 import speakeasy from "speakeasy";
+import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
@@ -92,12 +93,14 @@ export const generateMfaSetup = async (
 
 /**
  * Verifies the TOTP code using speakeasy.
- * If successful, marks MFA as enabled.
+ * If successful, marks MFA as enabled and generates backup codes.
+ * Returns the generated backup codes on success, otherwise null.
  */
 export const verifyMfaSetup = async (
   userId: string,
   token: string
-): Promise<boolean> => {
+): Promise<string[] | null> => {
+  // Return backup codes or null
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { mfaSecretEncrypted: true, mfaEnabled: true },
@@ -107,37 +110,202 @@ export const verifyMfaSetup = async (
     console.warn(
       `[MFA Service] Attempt to verify MFA for user ${userId} in invalid state.`
     );
-    return false;
+    return null;
   }
 
   try {
-    // Decrypt the stored base32 secret
     const decryptedBase32Secret = decryptMfaSecret(user.mfaSecretEncrypted);
 
-    // Verify the token using speakeasy
     const isValid = speakeasy.totp.verify({
       secret: decryptedBase32Secret,
       encoding: "base32",
       token: token,
-      window: 1, // Allow for a 1-step time drift
+      window: 1,
     });
 
     if (!isValid) {
-      return false;
+      return null; // Invalid token
     }
 
-    // Token is valid, mark MFA as enabled
-    await prisma.user.update({
-      where: { id: userId },
-      data: { mfaEnabled: true },
+    // Token is valid, now enable MFA and generate backup codes
+    // Use transaction to ensure both happen or neither
+    let backupCodes: string[] = [];
+    await prisma.$transaction(async (tx) => {
+      // 1. Mark MFA as enabled
+      await tx.user.update({
+        where: { id: userId },
+        data: { mfaEnabled: true },
+      });
+      // 2. Generate and store backup codes (using separate function)
+      // Note: generateAndStoreBackupCodes handles its own transaction internally for code storage
+      // If it throws, the outer transaction will roll back the mfaEnabled update.
+      backupCodes = await generateAndStoreBackupCodes(userId);
     });
 
-    return true;
+    return backupCodes; // Return plain text codes on success
   } catch (error) {
     console.error(
       `[MFA Service] Error verifying MFA setup for user ${userId}:`,
       error
     );
-    return false;
+    return null; // Return null on error
+  }
+};
+
+/**
+ * Verifies a TOTP code for login.
+ * Returns userId on success, null on failure.
+ */
+export const verifyLoginMfa = async (
+  userId: string,
+  token: string
+): Promise<string | null> => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { mfaSecretEncrypted: true, mfaEnabled: true },
+  });
+
+  // User must exist, have MFA enabled, and have a secret stored
+  if (!user || !user.mfaEnabled || !user.mfaSecretEncrypted) {
+    console.warn(
+      `[MFA Service] Attempt to verify login MFA for user ${userId} in invalid state.`
+    );
+    return null;
+  }
+
+  try {
+    const decryptedBase32Secret = decryptMfaSecret(user.mfaSecretEncrypted);
+
+    const isValid = speakeasy.totp.verify({
+      secret: decryptedBase32Secret,
+      encoding: "base32",
+      token: token,
+      window: 1, // Allow for time drift
+    });
+
+    return isValid ? userId : null;
+  } catch (error) {
+    console.error(
+      `[MFA Service] Error verifying login MFA for user ${userId}:`,
+      error
+    );
+    return null;
+  }
+};
+
+// --- Backup Code Logic ---
+const BACKUP_CODE_COUNT = 10;
+const BACKUP_CODE_LENGTH = 8; // Length of each code
+const BACKUP_CODE_SALT_ROUNDS = 10;
+
+// Generates a single alphanumeric backup code
+const generateSingleBackupCode = (length: number): string => {
+  // Simple alphanumeric generation
+  return crypto
+    .randomBytes(Math.ceil(length / 2))
+    .toString("hex")
+    .slice(0, length)
+    .toUpperCase();
+};
+
+/**
+ * Generates and stores hashed backup codes for a user.
+ * Deletes any existing codes for the user first.
+ * Returns the array of *plain text* codes for the user to save.
+ */
+export const generateAndStoreBackupCodes = async (
+  userId: string
+): Promise<string[]> => {
+  const plainTextCodes: string[] = [];
+  const hashedCodesData: { codeHash: string; userId: string }[] = [];
+
+  // Generate codes
+  for (let i = 0; i < BACKUP_CODE_COUNT; i++) {
+    const code = generateSingleBackupCode(BACKUP_CODE_LENGTH);
+    plainTextCodes.push(code);
+    // Hash the code before storing
+    const codeHash = await bcrypt.hash(code, BACKUP_CODE_SALT_ROUNDS);
+    hashedCodesData.push({ codeHash, userId });
+  }
+
+  // Store new codes in a transaction (delete old, create new)
+  try {
+    await prisma.$transaction(async (tx) => {
+      // 1. Delete old codes
+      await tx.backupCode.deleteMany({ where: { userId } });
+      // 2. Create new codes
+      await tx.backupCode.createMany({ data: hashedCodesData });
+    });
+
+    console.log(
+      `[MFA Service] Generated ${BACKUP_CODE_COUNT} backup codes for user ${userId}.`
+    );
+    return plainTextCodes; // Return plain text codes ONLY on successful generation
+  } catch (error) {
+    console.error(
+      `[MFA Service] Failed to store backup codes for user ${userId}:`,
+      error
+    );
+    // If storing fails, don't give the codes to the user
+    throw new Error("Failed to generate backup codes. Please try again.");
+  }
+};
+
+/**
+ * Verifies a provided backup code against stored hashes.
+ * Marks the code as used if valid.
+ * Returns userId on success, null on failure.
+ */
+export const verifyBackupCode = async (
+  userId: string,
+  providedCode: string
+): Promise<string | null> => {
+  // Fetch unused codes for the user
+  const userCodes = await prisma.backupCode.findMany({
+    where: { userId, used: false },
+    select: { id: true, codeHash: true },
+  });
+
+  if (!userCodes || userCodes.length === 0) {
+    console.warn(
+      `[MFA Service] No unused backup codes found for user ${userId} during verification attempt.`
+    );
+    return null;
+  }
+
+  let matchedCodeId: string | null = null;
+
+  // Compare provided code against each hash
+  for (const codeRecord of userCodes) {
+    const isValid = await bcrypt.compare(
+      providedCode.toUpperCase(),
+      codeRecord.codeHash
+    );
+    if (isValid) {
+      matchedCodeId = codeRecord.id;
+      break;
+    }
+  }
+
+  if (!matchedCodeId) {
+    return null;
+  }
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      // Mark the code as used within the transaction
+      await tx.backupCode.update({
+        where: { id: matchedCodeId },
+        data: { used: true },
+      });
+    });
+
+    return userId;
+  } catch (error) {
+    console.error(
+      `[MFA Service] Error marking backup code as used for user ${userId}:`,
+      error
+    );
+    return null;
   }
 };

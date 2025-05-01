@@ -28,6 +28,11 @@ export type VerificationToken = $Result.DefaultSelection<Prisma.$VerificationTok
  * 
  */
 export type PasswordResetToken = $Result.DefaultSelection<Prisma.$PasswordResetTokenPayload>
+/**
+ * Model BackupCode
+ * 
+ */
+export type BackupCode = $Result.DefaultSelection<Prisma.$BackupCodePayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -183,6 +188,16 @@ export class PrismaClient<
     * ```
     */
   get passwordResetToken(): Prisma.PasswordResetTokenDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.backupCode`: Exposes CRUD operations for the **BackupCode** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more BackupCodes
+    * const backupCodes = await prisma.backupCode.findMany()
+    * ```
+    */
+  get backupCode(): Prisma.BackupCodeDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -625,7 +640,8 @@ export namespace Prisma {
   export const ModelName: {
     User: 'User',
     VerificationToken: 'VerificationToken',
-    PasswordResetToken: 'PasswordResetToken'
+    PasswordResetToken: 'PasswordResetToken',
+    BackupCode: 'BackupCode'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -644,7 +660,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "verificationToken" | "passwordResetToken"
+      modelProps: "user" | "verificationToken" | "passwordResetToken" | "backupCode"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -870,6 +886,80 @@ export namespace Prisma {
           }
         }
       }
+      BackupCode: {
+        payload: Prisma.$BackupCodePayload<ExtArgs>
+        fields: Prisma.BackupCodeFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.BackupCodeFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BackupCodePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.BackupCodeFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BackupCodePayload>
+          }
+          findFirst: {
+            args: Prisma.BackupCodeFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BackupCodePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.BackupCodeFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BackupCodePayload>
+          }
+          findMany: {
+            args: Prisma.BackupCodeFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BackupCodePayload>[]
+          }
+          create: {
+            args: Prisma.BackupCodeCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BackupCodePayload>
+          }
+          createMany: {
+            args: Prisma.BackupCodeCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.BackupCodeCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BackupCodePayload>[]
+          }
+          delete: {
+            args: Prisma.BackupCodeDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BackupCodePayload>
+          }
+          update: {
+            args: Prisma.BackupCodeUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BackupCodePayload>
+          }
+          deleteMany: {
+            args: Prisma.BackupCodeDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.BackupCodeUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.BackupCodeUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BackupCodePayload>[]
+          }
+          upsert: {
+            args: Prisma.BackupCodeUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BackupCodePayload>
+          }
+          aggregate: {
+            args: Prisma.BackupCodeAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateBackupCode>
+          }
+          groupBy: {
+            args: Prisma.BackupCodeGroupByArgs<ExtArgs>
+            result: $Utils.Optional<BackupCodeGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.BackupCodeCountArgs<ExtArgs>
+            result: $Utils.Optional<BackupCodeCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -957,6 +1047,7 @@ export namespace Prisma {
     user?: UserOmit
     verificationToken?: VerificationTokenOmit
     passwordResetToken?: PasswordResetTokenOmit
+    backupCode?: BackupCodeOmit
   }
 
   /* Types for Logging */
@@ -1053,11 +1144,13 @@ export namespace Prisma {
   export type UserCountOutputType = {
     verificationTokens: number
     passwordResetTokens: number
+    backupCodes: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     verificationTokens?: boolean | UserCountOutputTypeCountVerificationTokensArgs
     passwordResetTokens?: boolean | UserCountOutputTypeCountPasswordResetTokensArgs
+    backupCodes?: boolean | UserCountOutputTypeCountBackupCodesArgs
   }
 
   // Custom InputTypes
@@ -1083,6 +1176,13 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountPasswordResetTokensArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: PasswordResetTokenWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountBackupCodesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BackupCodeWhereInput
   }
 
 
@@ -1288,6 +1388,7 @@ export namespace Prisma {
     mfaSecretEncrypted?: boolean
     verificationTokens?: boolean | User$verificationTokensArgs<ExtArgs>
     passwordResetTokens?: boolean | User$passwordResetTokensArgs<ExtArgs>
+    backupCodes?: boolean | User$backupCodesArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -1331,6 +1432,7 @@ export namespace Prisma {
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     verificationTokens?: boolean | User$verificationTokensArgs<ExtArgs>
     passwordResetTokens?: boolean | User$passwordResetTokensArgs<ExtArgs>
+    backupCodes?: boolean | User$backupCodesArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -1341,6 +1443,7 @@ export namespace Prisma {
     objects: {
       verificationTokens: Prisma.$VerificationTokenPayload<ExtArgs>[]
       passwordResetTokens: Prisma.$PasswordResetTokenPayload<ExtArgs>[]
+      backupCodes: Prisma.$BackupCodePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -1748,6 +1851,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     verificationTokens<T extends User$verificationTokensArgs<ExtArgs> = {}>(args?: Subset<T, User$verificationTokensArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VerificationTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     passwordResetTokens<T extends User$passwordResetTokensArgs<ExtArgs> = {}>(args?: Subset<T, User$passwordResetTokensArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PasswordResetTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    backupCodes<T extends User$backupCodesArgs<ExtArgs> = {}>(args?: Subset<T, User$backupCodesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BackupCodePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2219,6 +2323,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: PasswordResetTokenScalarFieldEnum | PasswordResetTokenScalarFieldEnum[]
+  }
+
+  /**
+   * User.backupCodes
+   */
+  export type User$backupCodesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BackupCode
+     */
+    select?: BackupCodeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BackupCode
+     */
+    omit?: BackupCodeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BackupCodeInclude<ExtArgs> | null
+    where?: BackupCodeWhereInput
+    orderBy?: BackupCodeOrderByWithRelationInput | BackupCodeOrderByWithRelationInput[]
+    cursor?: BackupCodeWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: BackupCodeScalarFieldEnum | BackupCodeScalarFieldEnum[]
   }
 
   /**
@@ -4357,6 +4485,1064 @@ export namespace Prisma {
 
 
   /**
+   * Model BackupCode
+   */
+
+  export type AggregateBackupCode = {
+    _count: BackupCodeCountAggregateOutputType | null
+    _min: BackupCodeMinAggregateOutputType | null
+    _max: BackupCodeMaxAggregateOutputType | null
+  }
+
+  export type BackupCodeMinAggregateOutputType = {
+    id: string | null
+    codeHash: string | null
+    used: boolean | null
+    userId: string | null
+    createdAt: Date | null
+  }
+
+  export type BackupCodeMaxAggregateOutputType = {
+    id: string | null
+    codeHash: string | null
+    used: boolean | null
+    userId: string | null
+    createdAt: Date | null
+  }
+
+  export type BackupCodeCountAggregateOutputType = {
+    id: number
+    codeHash: number
+    used: number
+    userId: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type BackupCodeMinAggregateInputType = {
+    id?: true
+    codeHash?: true
+    used?: true
+    userId?: true
+    createdAt?: true
+  }
+
+  export type BackupCodeMaxAggregateInputType = {
+    id?: true
+    codeHash?: true
+    used?: true
+    userId?: true
+    createdAt?: true
+  }
+
+  export type BackupCodeCountAggregateInputType = {
+    id?: true
+    codeHash?: true
+    used?: true
+    userId?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type BackupCodeAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which BackupCode to aggregate.
+     */
+    where?: BackupCodeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BackupCodes to fetch.
+     */
+    orderBy?: BackupCodeOrderByWithRelationInput | BackupCodeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: BackupCodeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BackupCodes from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BackupCodes.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned BackupCodes
+    **/
+    _count?: true | BackupCodeCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: BackupCodeMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: BackupCodeMaxAggregateInputType
+  }
+
+  export type GetBackupCodeAggregateType<T extends BackupCodeAggregateArgs> = {
+        [P in keyof T & keyof AggregateBackupCode]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateBackupCode[P]>
+      : GetScalarType<T[P], AggregateBackupCode[P]>
+  }
+
+
+
+
+  export type BackupCodeGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BackupCodeWhereInput
+    orderBy?: BackupCodeOrderByWithAggregationInput | BackupCodeOrderByWithAggregationInput[]
+    by: BackupCodeScalarFieldEnum[] | BackupCodeScalarFieldEnum
+    having?: BackupCodeScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: BackupCodeCountAggregateInputType | true
+    _min?: BackupCodeMinAggregateInputType
+    _max?: BackupCodeMaxAggregateInputType
+  }
+
+  export type BackupCodeGroupByOutputType = {
+    id: string
+    codeHash: string
+    used: boolean
+    userId: string
+    createdAt: Date
+    _count: BackupCodeCountAggregateOutputType | null
+    _min: BackupCodeMinAggregateOutputType | null
+    _max: BackupCodeMaxAggregateOutputType | null
+  }
+
+  type GetBackupCodeGroupByPayload<T extends BackupCodeGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<BackupCodeGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof BackupCodeGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], BackupCodeGroupByOutputType[P]>
+            : GetScalarType<T[P], BackupCodeGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type BackupCodeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    codeHash?: boolean
+    used?: boolean
+    userId?: boolean
+    createdAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["backupCode"]>
+
+  export type BackupCodeSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    codeHash?: boolean
+    used?: boolean
+    userId?: boolean
+    createdAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["backupCode"]>
+
+  export type BackupCodeSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    codeHash?: boolean
+    used?: boolean
+    userId?: boolean
+    createdAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["backupCode"]>
+
+  export type BackupCodeSelectScalar = {
+    id?: boolean
+    codeHash?: boolean
+    used?: boolean
+    userId?: boolean
+    createdAt?: boolean
+  }
+
+  export type BackupCodeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "codeHash" | "used" | "userId" | "createdAt", ExtArgs["result"]["backupCode"]>
+  export type BackupCodeInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type BackupCodeIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type BackupCodeIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $BackupCodePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "BackupCode"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      codeHash: string
+      used: boolean
+      userId: string
+      createdAt: Date
+    }, ExtArgs["result"]["backupCode"]>
+    composites: {}
+  }
+
+  type BackupCodeGetPayload<S extends boolean | null | undefined | BackupCodeDefaultArgs> = $Result.GetResult<Prisma.$BackupCodePayload, S>
+
+  type BackupCodeCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<BackupCodeFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: BackupCodeCountAggregateInputType | true
+    }
+
+  export interface BackupCodeDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['BackupCode'], meta: { name: 'BackupCode' } }
+    /**
+     * Find zero or one BackupCode that matches the filter.
+     * @param {BackupCodeFindUniqueArgs} args - Arguments to find a BackupCode
+     * @example
+     * // Get one BackupCode
+     * const backupCode = await prisma.backupCode.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends BackupCodeFindUniqueArgs>(args: SelectSubset<T, BackupCodeFindUniqueArgs<ExtArgs>>): Prisma__BackupCodeClient<$Result.GetResult<Prisma.$BackupCodePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one BackupCode that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {BackupCodeFindUniqueOrThrowArgs} args - Arguments to find a BackupCode
+     * @example
+     * // Get one BackupCode
+     * const backupCode = await prisma.backupCode.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends BackupCodeFindUniqueOrThrowArgs>(args: SelectSubset<T, BackupCodeFindUniqueOrThrowArgs<ExtArgs>>): Prisma__BackupCodeClient<$Result.GetResult<Prisma.$BackupCodePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first BackupCode that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BackupCodeFindFirstArgs} args - Arguments to find a BackupCode
+     * @example
+     * // Get one BackupCode
+     * const backupCode = await prisma.backupCode.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends BackupCodeFindFirstArgs>(args?: SelectSubset<T, BackupCodeFindFirstArgs<ExtArgs>>): Prisma__BackupCodeClient<$Result.GetResult<Prisma.$BackupCodePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first BackupCode that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BackupCodeFindFirstOrThrowArgs} args - Arguments to find a BackupCode
+     * @example
+     * // Get one BackupCode
+     * const backupCode = await prisma.backupCode.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends BackupCodeFindFirstOrThrowArgs>(args?: SelectSubset<T, BackupCodeFindFirstOrThrowArgs<ExtArgs>>): Prisma__BackupCodeClient<$Result.GetResult<Prisma.$BackupCodePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more BackupCodes that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BackupCodeFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all BackupCodes
+     * const backupCodes = await prisma.backupCode.findMany()
+     * 
+     * // Get first 10 BackupCodes
+     * const backupCodes = await prisma.backupCode.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const backupCodeWithIdOnly = await prisma.backupCode.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends BackupCodeFindManyArgs>(args?: SelectSubset<T, BackupCodeFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BackupCodePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a BackupCode.
+     * @param {BackupCodeCreateArgs} args - Arguments to create a BackupCode.
+     * @example
+     * // Create one BackupCode
+     * const BackupCode = await prisma.backupCode.create({
+     *   data: {
+     *     // ... data to create a BackupCode
+     *   }
+     * })
+     * 
+     */
+    create<T extends BackupCodeCreateArgs>(args: SelectSubset<T, BackupCodeCreateArgs<ExtArgs>>): Prisma__BackupCodeClient<$Result.GetResult<Prisma.$BackupCodePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many BackupCodes.
+     * @param {BackupCodeCreateManyArgs} args - Arguments to create many BackupCodes.
+     * @example
+     * // Create many BackupCodes
+     * const backupCode = await prisma.backupCode.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends BackupCodeCreateManyArgs>(args?: SelectSubset<T, BackupCodeCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many BackupCodes and returns the data saved in the database.
+     * @param {BackupCodeCreateManyAndReturnArgs} args - Arguments to create many BackupCodes.
+     * @example
+     * // Create many BackupCodes
+     * const backupCode = await prisma.backupCode.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many BackupCodes and only return the `id`
+     * const backupCodeWithIdOnly = await prisma.backupCode.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends BackupCodeCreateManyAndReturnArgs>(args?: SelectSubset<T, BackupCodeCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BackupCodePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a BackupCode.
+     * @param {BackupCodeDeleteArgs} args - Arguments to delete one BackupCode.
+     * @example
+     * // Delete one BackupCode
+     * const BackupCode = await prisma.backupCode.delete({
+     *   where: {
+     *     // ... filter to delete one BackupCode
+     *   }
+     * })
+     * 
+     */
+    delete<T extends BackupCodeDeleteArgs>(args: SelectSubset<T, BackupCodeDeleteArgs<ExtArgs>>): Prisma__BackupCodeClient<$Result.GetResult<Prisma.$BackupCodePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one BackupCode.
+     * @param {BackupCodeUpdateArgs} args - Arguments to update one BackupCode.
+     * @example
+     * // Update one BackupCode
+     * const backupCode = await prisma.backupCode.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends BackupCodeUpdateArgs>(args: SelectSubset<T, BackupCodeUpdateArgs<ExtArgs>>): Prisma__BackupCodeClient<$Result.GetResult<Prisma.$BackupCodePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more BackupCodes.
+     * @param {BackupCodeDeleteManyArgs} args - Arguments to filter BackupCodes to delete.
+     * @example
+     * // Delete a few BackupCodes
+     * const { count } = await prisma.backupCode.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends BackupCodeDeleteManyArgs>(args?: SelectSubset<T, BackupCodeDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more BackupCodes.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BackupCodeUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many BackupCodes
+     * const backupCode = await prisma.backupCode.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends BackupCodeUpdateManyArgs>(args: SelectSubset<T, BackupCodeUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more BackupCodes and returns the data updated in the database.
+     * @param {BackupCodeUpdateManyAndReturnArgs} args - Arguments to update many BackupCodes.
+     * @example
+     * // Update many BackupCodes
+     * const backupCode = await prisma.backupCode.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more BackupCodes and only return the `id`
+     * const backupCodeWithIdOnly = await prisma.backupCode.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends BackupCodeUpdateManyAndReturnArgs>(args: SelectSubset<T, BackupCodeUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BackupCodePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one BackupCode.
+     * @param {BackupCodeUpsertArgs} args - Arguments to update or create a BackupCode.
+     * @example
+     * // Update or create a BackupCode
+     * const backupCode = await prisma.backupCode.upsert({
+     *   create: {
+     *     // ... data to create a BackupCode
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the BackupCode we want to update
+     *   }
+     * })
+     */
+    upsert<T extends BackupCodeUpsertArgs>(args: SelectSubset<T, BackupCodeUpsertArgs<ExtArgs>>): Prisma__BackupCodeClient<$Result.GetResult<Prisma.$BackupCodePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of BackupCodes.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BackupCodeCountArgs} args - Arguments to filter BackupCodes to count.
+     * @example
+     * // Count the number of BackupCodes
+     * const count = await prisma.backupCode.count({
+     *   where: {
+     *     // ... the filter for the BackupCodes we want to count
+     *   }
+     * })
+    **/
+    count<T extends BackupCodeCountArgs>(
+      args?: Subset<T, BackupCodeCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], BackupCodeCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a BackupCode.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BackupCodeAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends BackupCodeAggregateArgs>(args: Subset<T, BackupCodeAggregateArgs>): Prisma.PrismaPromise<GetBackupCodeAggregateType<T>>
+
+    /**
+     * Group by BackupCode.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BackupCodeGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends BackupCodeGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: BackupCodeGroupByArgs['orderBy'] }
+        : { orderBy?: BackupCodeGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, BackupCodeGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetBackupCodeGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the BackupCode model
+   */
+  readonly fields: BackupCodeFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for BackupCode.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__BackupCodeClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the BackupCode model
+   */
+  interface BackupCodeFieldRefs {
+    readonly id: FieldRef<"BackupCode", 'String'>
+    readonly codeHash: FieldRef<"BackupCode", 'String'>
+    readonly used: FieldRef<"BackupCode", 'Boolean'>
+    readonly userId: FieldRef<"BackupCode", 'String'>
+    readonly createdAt: FieldRef<"BackupCode", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * BackupCode findUnique
+   */
+  export type BackupCodeFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BackupCode
+     */
+    select?: BackupCodeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BackupCode
+     */
+    omit?: BackupCodeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BackupCodeInclude<ExtArgs> | null
+    /**
+     * Filter, which BackupCode to fetch.
+     */
+    where: BackupCodeWhereUniqueInput
+  }
+
+  /**
+   * BackupCode findUniqueOrThrow
+   */
+  export type BackupCodeFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BackupCode
+     */
+    select?: BackupCodeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BackupCode
+     */
+    omit?: BackupCodeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BackupCodeInclude<ExtArgs> | null
+    /**
+     * Filter, which BackupCode to fetch.
+     */
+    where: BackupCodeWhereUniqueInput
+  }
+
+  /**
+   * BackupCode findFirst
+   */
+  export type BackupCodeFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BackupCode
+     */
+    select?: BackupCodeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BackupCode
+     */
+    omit?: BackupCodeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BackupCodeInclude<ExtArgs> | null
+    /**
+     * Filter, which BackupCode to fetch.
+     */
+    where?: BackupCodeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BackupCodes to fetch.
+     */
+    orderBy?: BackupCodeOrderByWithRelationInput | BackupCodeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for BackupCodes.
+     */
+    cursor?: BackupCodeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BackupCodes from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BackupCodes.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of BackupCodes.
+     */
+    distinct?: BackupCodeScalarFieldEnum | BackupCodeScalarFieldEnum[]
+  }
+
+  /**
+   * BackupCode findFirstOrThrow
+   */
+  export type BackupCodeFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BackupCode
+     */
+    select?: BackupCodeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BackupCode
+     */
+    omit?: BackupCodeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BackupCodeInclude<ExtArgs> | null
+    /**
+     * Filter, which BackupCode to fetch.
+     */
+    where?: BackupCodeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BackupCodes to fetch.
+     */
+    orderBy?: BackupCodeOrderByWithRelationInput | BackupCodeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for BackupCodes.
+     */
+    cursor?: BackupCodeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BackupCodes from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BackupCodes.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of BackupCodes.
+     */
+    distinct?: BackupCodeScalarFieldEnum | BackupCodeScalarFieldEnum[]
+  }
+
+  /**
+   * BackupCode findMany
+   */
+  export type BackupCodeFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BackupCode
+     */
+    select?: BackupCodeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BackupCode
+     */
+    omit?: BackupCodeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BackupCodeInclude<ExtArgs> | null
+    /**
+     * Filter, which BackupCodes to fetch.
+     */
+    where?: BackupCodeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BackupCodes to fetch.
+     */
+    orderBy?: BackupCodeOrderByWithRelationInput | BackupCodeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing BackupCodes.
+     */
+    cursor?: BackupCodeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BackupCodes from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BackupCodes.
+     */
+    skip?: number
+    distinct?: BackupCodeScalarFieldEnum | BackupCodeScalarFieldEnum[]
+  }
+
+  /**
+   * BackupCode create
+   */
+  export type BackupCodeCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BackupCode
+     */
+    select?: BackupCodeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BackupCode
+     */
+    omit?: BackupCodeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BackupCodeInclude<ExtArgs> | null
+    /**
+     * The data needed to create a BackupCode.
+     */
+    data: XOR<BackupCodeCreateInput, BackupCodeUncheckedCreateInput>
+  }
+
+  /**
+   * BackupCode createMany
+   */
+  export type BackupCodeCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many BackupCodes.
+     */
+    data: BackupCodeCreateManyInput | BackupCodeCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * BackupCode createManyAndReturn
+   */
+  export type BackupCodeCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BackupCode
+     */
+    select?: BackupCodeSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the BackupCode
+     */
+    omit?: BackupCodeOmit<ExtArgs> | null
+    /**
+     * The data used to create many BackupCodes.
+     */
+    data: BackupCodeCreateManyInput | BackupCodeCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BackupCodeIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * BackupCode update
+   */
+  export type BackupCodeUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BackupCode
+     */
+    select?: BackupCodeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BackupCode
+     */
+    omit?: BackupCodeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BackupCodeInclude<ExtArgs> | null
+    /**
+     * The data needed to update a BackupCode.
+     */
+    data: XOR<BackupCodeUpdateInput, BackupCodeUncheckedUpdateInput>
+    /**
+     * Choose, which BackupCode to update.
+     */
+    where: BackupCodeWhereUniqueInput
+  }
+
+  /**
+   * BackupCode updateMany
+   */
+  export type BackupCodeUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update BackupCodes.
+     */
+    data: XOR<BackupCodeUpdateManyMutationInput, BackupCodeUncheckedUpdateManyInput>
+    /**
+     * Filter which BackupCodes to update
+     */
+    where?: BackupCodeWhereInput
+    /**
+     * Limit how many BackupCodes to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * BackupCode updateManyAndReturn
+   */
+  export type BackupCodeUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BackupCode
+     */
+    select?: BackupCodeSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the BackupCode
+     */
+    omit?: BackupCodeOmit<ExtArgs> | null
+    /**
+     * The data used to update BackupCodes.
+     */
+    data: XOR<BackupCodeUpdateManyMutationInput, BackupCodeUncheckedUpdateManyInput>
+    /**
+     * Filter which BackupCodes to update
+     */
+    where?: BackupCodeWhereInput
+    /**
+     * Limit how many BackupCodes to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BackupCodeIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * BackupCode upsert
+   */
+  export type BackupCodeUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BackupCode
+     */
+    select?: BackupCodeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BackupCode
+     */
+    omit?: BackupCodeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BackupCodeInclude<ExtArgs> | null
+    /**
+     * The filter to search for the BackupCode to update in case it exists.
+     */
+    where: BackupCodeWhereUniqueInput
+    /**
+     * In case the BackupCode found by the `where` argument doesn't exist, create a new BackupCode with this data.
+     */
+    create: XOR<BackupCodeCreateInput, BackupCodeUncheckedCreateInput>
+    /**
+     * In case the BackupCode was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<BackupCodeUpdateInput, BackupCodeUncheckedUpdateInput>
+  }
+
+  /**
+   * BackupCode delete
+   */
+  export type BackupCodeDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BackupCode
+     */
+    select?: BackupCodeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BackupCode
+     */
+    omit?: BackupCodeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BackupCodeInclude<ExtArgs> | null
+    /**
+     * Filter which BackupCode to delete.
+     */
+    where: BackupCodeWhereUniqueInput
+  }
+
+  /**
+   * BackupCode deleteMany
+   */
+  export type BackupCodeDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which BackupCodes to delete
+     */
+    where?: BackupCodeWhereInput
+    /**
+     * Limit how many BackupCodes to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * BackupCode without action
+   */
+  export type BackupCodeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BackupCode
+     */
+    select?: BackupCodeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BackupCode
+     */
+    omit?: BackupCodeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BackupCodeInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -4405,6 +5591,17 @@ export namespace Prisma {
   };
 
   export type PasswordResetTokenScalarFieldEnum = (typeof PasswordResetTokenScalarFieldEnum)[keyof typeof PasswordResetTokenScalarFieldEnum]
+
+
+  export const BackupCodeScalarFieldEnum: {
+    id: 'id',
+    codeHash: 'codeHash',
+    used: 'used',
+    userId: 'userId',
+    createdAt: 'createdAt'
+  };
+
+  export type BackupCodeScalarFieldEnum = (typeof BackupCodeScalarFieldEnum)[keyof typeof BackupCodeScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -4503,6 +5700,7 @@ export namespace Prisma {
     mfaSecretEncrypted?: StringNullableFilter<"User"> | string | null
     verificationTokens?: VerificationTokenListRelationFilter
     passwordResetTokens?: PasswordResetTokenListRelationFilter
+    backupCodes?: BackupCodeListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -4517,6 +5715,7 @@ export namespace Prisma {
     mfaSecretEncrypted?: SortOrderInput | SortOrder
     verificationTokens?: VerificationTokenOrderByRelationAggregateInput
     passwordResetTokens?: PasswordResetTokenOrderByRelationAggregateInput
+    backupCodes?: BackupCodeOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -4534,6 +5733,7 @@ export namespace Prisma {
     mfaSecretEncrypted?: StringNullableFilter<"User"> | string | null
     verificationTokens?: VerificationTokenListRelationFilter
     passwordResetTokens?: PasswordResetTokenListRelationFilter
+    backupCodes?: BackupCodeListRelationFilter
   }, "id" | "email">
 
   export type UserOrderByWithAggregationInput = {
@@ -4676,6 +5876,62 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"PasswordResetToken"> | Date | string
   }
 
+  export type BackupCodeWhereInput = {
+    AND?: BackupCodeWhereInput | BackupCodeWhereInput[]
+    OR?: BackupCodeWhereInput[]
+    NOT?: BackupCodeWhereInput | BackupCodeWhereInput[]
+    id?: StringFilter<"BackupCode"> | string
+    codeHash?: StringFilter<"BackupCode"> | string
+    used?: BoolFilter<"BackupCode"> | boolean
+    userId?: StringFilter<"BackupCode"> | string
+    createdAt?: DateTimeFilter<"BackupCode"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }
+
+  export type BackupCodeOrderByWithRelationInput = {
+    id?: SortOrder
+    codeHash?: SortOrder
+    used?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type BackupCodeWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    userId_codeHash?: BackupCodeUserIdCodeHashCompoundUniqueInput
+    AND?: BackupCodeWhereInput | BackupCodeWhereInput[]
+    OR?: BackupCodeWhereInput[]
+    NOT?: BackupCodeWhereInput | BackupCodeWhereInput[]
+    codeHash?: StringFilter<"BackupCode"> | string
+    used?: BoolFilter<"BackupCode"> | boolean
+    userId?: StringFilter<"BackupCode"> | string
+    createdAt?: DateTimeFilter<"BackupCode"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }, "id" | "userId_codeHash">
+
+  export type BackupCodeOrderByWithAggregationInput = {
+    id?: SortOrder
+    codeHash?: SortOrder
+    used?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    _count?: BackupCodeCountOrderByAggregateInput
+    _max?: BackupCodeMaxOrderByAggregateInput
+    _min?: BackupCodeMinOrderByAggregateInput
+  }
+
+  export type BackupCodeScalarWhereWithAggregatesInput = {
+    AND?: BackupCodeScalarWhereWithAggregatesInput | BackupCodeScalarWhereWithAggregatesInput[]
+    OR?: BackupCodeScalarWhereWithAggregatesInput[]
+    NOT?: BackupCodeScalarWhereWithAggregatesInput | BackupCodeScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"BackupCode"> | string
+    codeHash?: StringWithAggregatesFilter<"BackupCode"> | string
+    used?: BoolWithAggregatesFilter<"BackupCode"> | boolean
+    userId?: StringWithAggregatesFilter<"BackupCode"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"BackupCode"> | Date | string
+  }
+
   export type UserCreateInput = {
     id?: string
     email: string
@@ -4688,6 +5944,7 @@ export namespace Prisma {
     mfaSecretEncrypted?: string | null
     verificationTokens?: VerificationTokenCreateNestedManyWithoutUserInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    backupCodes?: BackupCodeCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -4702,6 +5959,7 @@ export namespace Prisma {
     mfaSecretEncrypted?: string | null
     verificationTokens?: VerificationTokenUncheckedCreateNestedManyWithoutUserInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    backupCodes?: BackupCodeUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserUpdateInput = {
@@ -4716,6 +5974,7 @@ export namespace Prisma {
     mfaSecretEncrypted?: NullableStringFieldUpdateOperationsInput | string | null
     verificationTokens?: VerificationTokenUpdateManyWithoutUserNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    backupCodes?: BackupCodeUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -4730,6 +5989,7 @@ export namespace Prisma {
     mfaSecretEncrypted?: NullableStringFieldUpdateOperationsInput | string | null
     verificationTokens?: VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    backupCodes?: BackupCodeUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -4878,6 +6138,61 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type BackupCodeCreateInput = {
+    id?: string
+    codeHash: string
+    used?: boolean
+    createdAt?: Date | string
+    user: UserCreateNestedOneWithoutBackupCodesInput
+  }
+
+  export type BackupCodeUncheckedCreateInput = {
+    id?: string
+    codeHash: string
+    used?: boolean
+    userId: string
+    createdAt?: Date | string
+  }
+
+  export type BackupCodeUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    codeHash?: StringFieldUpdateOperationsInput | string
+    used?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutBackupCodesNestedInput
+  }
+
+  export type BackupCodeUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    codeHash?: StringFieldUpdateOperationsInput | string
+    used?: BoolFieldUpdateOperationsInput | boolean
+    userId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BackupCodeCreateManyInput = {
+    id?: string
+    codeHash: string
+    used?: boolean
+    userId: string
+    createdAt?: Date | string
+  }
+
+  export type BackupCodeUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    codeHash?: StringFieldUpdateOperationsInput | string
+    used?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BackupCodeUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    codeHash?: StringFieldUpdateOperationsInput | string
+    used?: BoolFieldUpdateOperationsInput | boolean
+    userId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -4936,6 +6251,12 @@ export namespace Prisma {
     none?: PasswordResetTokenWhereInput
   }
 
+  export type BackupCodeListRelationFilter = {
+    every?: BackupCodeWhereInput
+    some?: BackupCodeWhereInput
+    none?: BackupCodeWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -4946,6 +6267,10 @@ export namespace Prisma {
   }
 
   export type PasswordResetTokenOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type BackupCodeOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -5096,6 +6421,35 @@ export namespace Prisma {
     createdAt?: SortOrder
   }
 
+  export type BackupCodeUserIdCodeHashCompoundUniqueInput = {
+    userId: string
+    codeHash: string
+  }
+
+  export type BackupCodeCountOrderByAggregateInput = {
+    id?: SortOrder
+    codeHash?: SortOrder
+    used?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type BackupCodeMaxOrderByAggregateInput = {
+    id?: SortOrder
+    codeHash?: SortOrder
+    used?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type BackupCodeMinOrderByAggregateInput = {
+    id?: SortOrder
+    codeHash?: SortOrder
+    used?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+  }
+
   export type VerificationTokenCreateNestedManyWithoutUserInput = {
     create?: XOR<VerificationTokenCreateWithoutUserInput, VerificationTokenUncheckedCreateWithoutUserInput> | VerificationTokenCreateWithoutUserInput[] | VerificationTokenUncheckedCreateWithoutUserInput[]
     connectOrCreate?: VerificationTokenCreateOrConnectWithoutUserInput | VerificationTokenCreateOrConnectWithoutUserInput[]
@@ -5110,6 +6464,13 @@ export namespace Prisma {
     connect?: PasswordResetTokenWhereUniqueInput | PasswordResetTokenWhereUniqueInput[]
   }
 
+  export type BackupCodeCreateNestedManyWithoutUserInput = {
+    create?: XOR<BackupCodeCreateWithoutUserInput, BackupCodeUncheckedCreateWithoutUserInput> | BackupCodeCreateWithoutUserInput[] | BackupCodeUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: BackupCodeCreateOrConnectWithoutUserInput | BackupCodeCreateOrConnectWithoutUserInput[]
+    createMany?: BackupCodeCreateManyUserInputEnvelope
+    connect?: BackupCodeWhereUniqueInput | BackupCodeWhereUniqueInput[]
+  }
+
   export type VerificationTokenUncheckedCreateNestedManyWithoutUserInput = {
     create?: XOR<VerificationTokenCreateWithoutUserInput, VerificationTokenUncheckedCreateWithoutUserInput> | VerificationTokenCreateWithoutUserInput[] | VerificationTokenUncheckedCreateWithoutUserInput[]
     connectOrCreate?: VerificationTokenCreateOrConnectWithoutUserInput | VerificationTokenCreateOrConnectWithoutUserInput[]
@@ -5122,6 +6483,13 @@ export namespace Prisma {
     connectOrCreate?: PasswordResetTokenCreateOrConnectWithoutUserInput | PasswordResetTokenCreateOrConnectWithoutUserInput[]
     createMany?: PasswordResetTokenCreateManyUserInputEnvelope
     connect?: PasswordResetTokenWhereUniqueInput | PasswordResetTokenWhereUniqueInput[]
+  }
+
+  export type BackupCodeUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<BackupCodeCreateWithoutUserInput, BackupCodeUncheckedCreateWithoutUserInput> | BackupCodeCreateWithoutUserInput[] | BackupCodeUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: BackupCodeCreateOrConnectWithoutUserInput | BackupCodeCreateOrConnectWithoutUserInput[]
+    createMany?: BackupCodeCreateManyUserInputEnvelope
+    connect?: BackupCodeWhereUniqueInput | BackupCodeWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -5168,6 +6536,20 @@ export namespace Prisma {
     deleteMany?: PasswordResetTokenScalarWhereInput | PasswordResetTokenScalarWhereInput[]
   }
 
+  export type BackupCodeUpdateManyWithoutUserNestedInput = {
+    create?: XOR<BackupCodeCreateWithoutUserInput, BackupCodeUncheckedCreateWithoutUserInput> | BackupCodeCreateWithoutUserInput[] | BackupCodeUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: BackupCodeCreateOrConnectWithoutUserInput | BackupCodeCreateOrConnectWithoutUserInput[]
+    upsert?: BackupCodeUpsertWithWhereUniqueWithoutUserInput | BackupCodeUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: BackupCodeCreateManyUserInputEnvelope
+    set?: BackupCodeWhereUniqueInput | BackupCodeWhereUniqueInput[]
+    disconnect?: BackupCodeWhereUniqueInput | BackupCodeWhereUniqueInput[]
+    delete?: BackupCodeWhereUniqueInput | BackupCodeWhereUniqueInput[]
+    connect?: BackupCodeWhereUniqueInput | BackupCodeWhereUniqueInput[]
+    update?: BackupCodeUpdateWithWhereUniqueWithoutUserInput | BackupCodeUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: BackupCodeUpdateManyWithWhereWithoutUserInput | BackupCodeUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: BackupCodeScalarWhereInput | BackupCodeScalarWhereInput[]
+  }
+
   export type VerificationTokenUncheckedUpdateManyWithoutUserNestedInput = {
     create?: XOR<VerificationTokenCreateWithoutUserInput, VerificationTokenUncheckedCreateWithoutUserInput> | VerificationTokenCreateWithoutUserInput[] | VerificationTokenUncheckedCreateWithoutUserInput[]
     connectOrCreate?: VerificationTokenCreateOrConnectWithoutUserInput | VerificationTokenCreateOrConnectWithoutUserInput[]
@@ -5196,6 +6578,20 @@ export namespace Prisma {
     deleteMany?: PasswordResetTokenScalarWhereInput | PasswordResetTokenScalarWhereInput[]
   }
 
+  export type BackupCodeUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<BackupCodeCreateWithoutUserInput, BackupCodeUncheckedCreateWithoutUserInput> | BackupCodeCreateWithoutUserInput[] | BackupCodeUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: BackupCodeCreateOrConnectWithoutUserInput | BackupCodeCreateOrConnectWithoutUserInput[]
+    upsert?: BackupCodeUpsertWithWhereUniqueWithoutUserInput | BackupCodeUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: BackupCodeCreateManyUserInputEnvelope
+    set?: BackupCodeWhereUniqueInput | BackupCodeWhereUniqueInput[]
+    disconnect?: BackupCodeWhereUniqueInput | BackupCodeWhereUniqueInput[]
+    delete?: BackupCodeWhereUniqueInput | BackupCodeWhereUniqueInput[]
+    connect?: BackupCodeWhereUniqueInput | BackupCodeWhereUniqueInput[]
+    update?: BackupCodeUpdateWithWhereUniqueWithoutUserInput | BackupCodeUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: BackupCodeUpdateManyWithWhereWithoutUserInput | BackupCodeUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: BackupCodeScalarWhereInput | BackupCodeScalarWhereInput[]
+  }
+
   export type UserCreateNestedOneWithoutVerificationTokensInput = {
     create?: XOR<UserCreateWithoutVerificationTokensInput, UserUncheckedCreateWithoutVerificationTokensInput>
     connectOrCreate?: UserCreateOrConnectWithoutVerificationTokensInput
@@ -5222,6 +6618,20 @@ export namespace Prisma {
     upsert?: UserUpsertWithoutPasswordResetTokensInput
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutPasswordResetTokensInput, UserUpdateWithoutPasswordResetTokensInput>, UserUncheckedUpdateWithoutPasswordResetTokensInput>
+  }
+
+  export type UserCreateNestedOneWithoutBackupCodesInput = {
+    create?: XOR<UserCreateWithoutBackupCodesInput, UserUncheckedCreateWithoutBackupCodesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutBackupCodesInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type UserUpdateOneRequiredWithoutBackupCodesNestedInput = {
+    create?: XOR<UserCreateWithoutBackupCodesInput, UserUncheckedCreateWithoutBackupCodesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutBackupCodesInput
+    upsert?: UserUpsertWithoutBackupCodesInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutBackupCodesInput, UserUpdateWithoutBackupCodesInput>, UserUncheckedUpdateWithoutBackupCodesInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -5394,6 +6804,30 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type BackupCodeCreateWithoutUserInput = {
+    id?: string
+    codeHash: string
+    used?: boolean
+    createdAt?: Date | string
+  }
+
+  export type BackupCodeUncheckedCreateWithoutUserInput = {
+    id?: string
+    codeHash: string
+    used?: boolean
+    createdAt?: Date | string
+  }
+
+  export type BackupCodeCreateOrConnectWithoutUserInput = {
+    where: BackupCodeWhereUniqueInput
+    create: XOR<BackupCodeCreateWithoutUserInput, BackupCodeUncheckedCreateWithoutUserInput>
+  }
+
+  export type BackupCodeCreateManyUserInputEnvelope = {
+    data: BackupCodeCreateManyUserInput | BackupCodeCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
   export type VerificationTokenUpsertWithWhereUniqueWithoutUserInput = {
     where: VerificationTokenWhereUniqueInput
     update: XOR<VerificationTokenUpdateWithoutUserInput, VerificationTokenUncheckedUpdateWithoutUserInput>
@@ -5448,6 +6882,33 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"PasswordResetToken"> | Date | string
   }
 
+  export type BackupCodeUpsertWithWhereUniqueWithoutUserInput = {
+    where: BackupCodeWhereUniqueInput
+    update: XOR<BackupCodeUpdateWithoutUserInput, BackupCodeUncheckedUpdateWithoutUserInput>
+    create: XOR<BackupCodeCreateWithoutUserInput, BackupCodeUncheckedCreateWithoutUserInput>
+  }
+
+  export type BackupCodeUpdateWithWhereUniqueWithoutUserInput = {
+    where: BackupCodeWhereUniqueInput
+    data: XOR<BackupCodeUpdateWithoutUserInput, BackupCodeUncheckedUpdateWithoutUserInput>
+  }
+
+  export type BackupCodeUpdateManyWithWhereWithoutUserInput = {
+    where: BackupCodeScalarWhereInput
+    data: XOR<BackupCodeUpdateManyMutationInput, BackupCodeUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type BackupCodeScalarWhereInput = {
+    AND?: BackupCodeScalarWhereInput | BackupCodeScalarWhereInput[]
+    OR?: BackupCodeScalarWhereInput[]
+    NOT?: BackupCodeScalarWhereInput | BackupCodeScalarWhereInput[]
+    id?: StringFilter<"BackupCode"> | string
+    codeHash?: StringFilter<"BackupCode"> | string
+    used?: BoolFilter<"BackupCode"> | boolean
+    userId?: StringFilter<"BackupCode"> | string
+    createdAt?: DateTimeFilter<"BackupCode"> | Date | string
+  }
+
   export type UserCreateWithoutVerificationTokensInput = {
     id?: string
     email: string
@@ -5459,6 +6920,7 @@ export namespace Prisma {
     mfaEnabled?: boolean
     mfaSecretEncrypted?: string | null
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    backupCodes?: BackupCodeCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutVerificationTokensInput = {
@@ -5472,6 +6934,7 @@ export namespace Prisma {
     mfaEnabled?: boolean
     mfaSecretEncrypted?: string | null
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    backupCodes?: BackupCodeUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutVerificationTokensInput = {
@@ -5501,6 +6964,7 @@ export namespace Prisma {
     mfaEnabled?: BoolFieldUpdateOperationsInput | boolean
     mfaSecretEncrypted?: NullableStringFieldUpdateOperationsInput | string | null
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    backupCodes?: BackupCodeUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutVerificationTokensInput = {
@@ -5514,6 +6978,7 @@ export namespace Prisma {
     mfaEnabled?: BoolFieldUpdateOperationsInput | boolean
     mfaSecretEncrypted?: NullableStringFieldUpdateOperationsInput | string | null
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    backupCodes?: BackupCodeUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutPasswordResetTokensInput = {
@@ -5527,6 +6992,7 @@ export namespace Prisma {
     mfaEnabled?: boolean
     mfaSecretEncrypted?: string | null
     verificationTokens?: VerificationTokenCreateNestedManyWithoutUserInput
+    backupCodes?: BackupCodeCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
@@ -5540,6 +7006,7 @@ export namespace Prisma {
     mfaEnabled?: boolean
     mfaSecretEncrypted?: string | null
     verificationTokens?: VerificationTokenUncheckedCreateNestedManyWithoutUserInput
+    backupCodes?: BackupCodeUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutPasswordResetTokensInput = {
@@ -5569,6 +7036,7 @@ export namespace Prisma {
     mfaEnabled?: BoolFieldUpdateOperationsInput | boolean
     mfaSecretEncrypted?: NullableStringFieldUpdateOperationsInput | string | null
     verificationTokens?: VerificationTokenUpdateManyWithoutUserNestedInput
+    backupCodes?: BackupCodeUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
@@ -5582,6 +7050,79 @@ export namespace Prisma {
     mfaEnabled?: BoolFieldUpdateOperationsInput | boolean
     mfaSecretEncrypted?: NullableStringFieldUpdateOperationsInput | string | null
     verificationTokens?: VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+    backupCodes?: BackupCodeUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserCreateWithoutBackupCodesInput = {
+    id?: string
+    email: string
+    passwordHash: string
+    hashingAlgorithm?: string
+    isVerified?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    mfaEnabled?: boolean
+    mfaSecretEncrypted?: string | null
+    verificationTokens?: VerificationTokenCreateNestedManyWithoutUserInput
+    passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutBackupCodesInput = {
+    id?: string
+    email: string
+    passwordHash: string
+    hashingAlgorithm?: string
+    isVerified?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    mfaEnabled?: boolean
+    mfaSecretEncrypted?: string | null
+    verificationTokens?: VerificationTokenUncheckedCreateNestedManyWithoutUserInput
+    passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutBackupCodesInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutBackupCodesInput, UserUncheckedCreateWithoutBackupCodesInput>
+  }
+
+  export type UserUpsertWithoutBackupCodesInput = {
+    update: XOR<UserUpdateWithoutBackupCodesInput, UserUncheckedUpdateWithoutBackupCodesInput>
+    create: XOR<UserCreateWithoutBackupCodesInput, UserUncheckedCreateWithoutBackupCodesInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutBackupCodesInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutBackupCodesInput, UserUncheckedUpdateWithoutBackupCodesInput>
+  }
+
+  export type UserUpdateWithoutBackupCodesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    hashingAlgorithm?: StringFieldUpdateOperationsInput | string
+    isVerified?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    mfaEnabled?: BoolFieldUpdateOperationsInput | boolean
+    mfaSecretEncrypted?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationTokens?: VerificationTokenUpdateManyWithoutUserNestedInput
+    passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutBackupCodesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    hashingAlgorithm?: StringFieldUpdateOperationsInput | string
+    isVerified?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    mfaEnabled?: BoolFieldUpdateOperationsInput | boolean
+    mfaSecretEncrypted?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationTokens?: VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+    passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type VerificationTokenCreateManyUserInput = {
@@ -5595,6 +7136,13 @@ export namespace Prisma {
     id?: string
     token: string
     expiresAt: Date | string
+    createdAt?: Date | string
+  }
+
+  export type BackupCodeCreateManyUserInput = {
+    id?: string
+    codeHash: string
+    used?: boolean
     createdAt?: Date | string
   }
 
@@ -5637,6 +7185,27 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     token?: StringFieldUpdateOperationsInput | string
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BackupCodeUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    codeHash?: StringFieldUpdateOperationsInput | string
+    used?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BackupCodeUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    codeHash?: StringFieldUpdateOperationsInput | string
+    used?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BackupCodeUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    codeHash?: StringFieldUpdateOperationsInput | string
+    used?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 

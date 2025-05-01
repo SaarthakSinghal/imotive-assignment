@@ -1,44 +1,31 @@
 import { Request, Response } from "express";
 import qrcode from "qrcode";
 import { generateMfaSetup, verifyMfaSetup } from "../services/mfa.service";
+import { PrismaClient } from "../generated/prisma"; // Import PrismaClient
 
-// Placeholder for extracting authenticated user ID (replace with actual middleware logic)
-const getUserIdFromRequest = (req: Request): string | null => {
-  // Example: return req.user?.id;
-  // For now, returning a hardcoded ID for testing is problematic.
-  // Let's assume middleware adds it, but throw if missing.
-  if ((req as any).userId) {
-    return (req as any).userId as string;
-  }
-  // In a real app, middleware should reject unauthenticated requests before reaching here.
-  console.error(
-    "[MFA Controller] User ID missing from request. Auth middleware not run or failed?"
-  );
-  return null;
-};
-
-// Placeholder for extracting user email (needed for OTP label)
-const getUserEmailFromRequest = (req: Request): string | null => {
-  // Example: return req.user?.email;
-  if ((req as any).userEmail) {
-    return (req as any).userEmail as string;
-  }
-  console.error("[MFA Controller] User email missing from request.");
-  return null;
-};
+const prisma = new PrismaClient(); // Instantiate PrismaClient
 
 export const enableMfaSetupHandler = async (req: Request, res: Response) => {
-  const userId = getUserIdFromRequest(req);
-  const email = getUserEmailFromRequest(req); // Needed for otpauth URL label
-
-  if (!userId || !email) {
-    res
-      .status(401)
-      .json({ status: "fail", message: "Authentication required." });
-    return;
-  }
+  // Get userId from session (ensureAuthenticated middleware guarantees it exists)
+  const userId = req.session.userId!;
 
   try {
+    // Fetch user email needed for OTP label
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { email: true },
+    });
+
+    if (!user) {
+      // This shouldn't happen if session userId is valid
+      console.error(`[MFA Controller] User ${userId} not found in DB.`);
+      res
+        .status(401)
+        .json({ status: "fail", message: "Invalid user session." });
+      return;
+    }
+    const email = user.email;
+
     const { otpAuthUrl } = await generateMfaSetup(userId, email);
 
     // Generate QR code from the otpauth:// URL
@@ -66,15 +53,9 @@ export const enableMfaSetupHandler = async (req: Request, res: Response) => {
 };
 
 export const verifyMfaSetupHandler = async (req: Request, res: Response) => {
-  const userId = getUserIdFromRequest(req);
-  const { token } = req.body; // Get TOTP token from request body
-
-  if (!userId) {
-    res
-      .status(401)
-      .json({ status: "fail", message: "Authentication required." });
-    return;
-  }
+  // Get userId from session
+  const userId = req.session.userId!;
+  const { token } = req.body;
 
   if (!token || typeof token !== "string") {
     res.status(400).json({ status: "fail", message: "MFA token is required." });
@@ -82,14 +63,23 @@ export const verifyMfaSetupHandler = async (req: Request, res: Response) => {
   }
 
   try {
-    const success = await verifyMfaSetup(userId, token);
+    // Service now returns backup codes array or null
+    const backupCodes = await verifyMfaSetup(userId, token);
 
-    if (success) {
-      res
-        .status(200)
-        .json({ status: "success", message: "MFA enabled successfully." });
+    if (backupCodes) {
+      // Include backup codes in the success response
+      res.status(200).json({
+        status: "success",
+        message: "MFA enabled successfully. Save your backup codes!",
+        data: {
+          backupCodes: backupCodes,
+        },
+      });
     } else {
-      res.status(400).json({ status: "fail", message: "Invalid MFA token." });
+      res.status(400).json({
+        status: "fail",
+        message: "Invalid MFA token or setup failed.",
+      });
     }
     return;
   } catch (error) {
@@ -97,9 +87,10 @@ export const verifyMfaSetupHandler = async (req: Request, res: Response) => {
       `[MFA Controller] Error verifying MFA setup for user ${userId}:`,
       error
     );
-    res
-      .status(500)
-      .json({ status: "error", message: "Failed to verify MFA setup." });
+    // Include error message if it was thrown by generateAndStoreBackupCodes
+    const errorMessage =
+      error instanceof Error ? error.message : "Failed to verify MFA setup.";
+    res.status(500).json({ status: "error", message: errorMessage });
     return;
   }
 };

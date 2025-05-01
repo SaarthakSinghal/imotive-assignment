@@ -15,14 +15,21 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String
-  isVerified   Boolean  @default(false)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id               String   @id @default(cuid())
+  email            String   @unique
+  passwordHash     String
+  hashingAlgorithm String   @default("argon2")
+  isVerified       Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-  verificationTokens VerificationToken[]
+  // MFA Fields
+  mfaEnabled         Boolean @default(false)
+  mfaSecretEncrypted String? // Encrypted TOTP secret
+
+  verificationTokens  VerificationToken[]
+  passwordResetTokens PasswordResetToken[]
+  backupCodes         BackupCode[]
 }
 
 model VerificationToken {
@@ -33,4 +40,27 @@ model VerificationToken {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  expiresAt DateTime
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+// Added: Model for MFA backup codes
+model BackupCode {
+  id       String  @id @default(cuid())
+  codeHash String // Hashed backup code (use bcrypt or argon2)
+  used     Boolean @default(false)
+  userId   String // Foreign key to User
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade) // Relation field
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, codeHash]) // Ensure a user doesn't have duplicate code hashes
 }

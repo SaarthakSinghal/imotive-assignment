@@ -5,6 +5,8 @@ import {
   verifyEmailHandler,
   forgotPasswordHandler,
   resetPasswordHandler,
+  mfaLoginHandler,
+  mfaLoginBackupHandler,
 } from "../controllers/auth.controller";
 import { validate } from "../middleware/validate";
 import {
@@ -12,6 +14,8 @@ import {
   loginSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
+  verifyMfaLoginSchema,
+  verifyMfaBackupSchema,
 } from "../utils/validators";
 
 const router = express.Router();
@@ -42,6 +46,18 @@ router.post(
   "/reset-password",
   validate(resetPasswordSchema),
   resetPasswordHandler
+);
+
+// MFA Login Verification route
+// POST /api/auth/login/mfa
+router.post("/login/mfa", validate(verifyMfaLoginSchema), mfaLoginHandler);
+
+// MFA Backup Code Login route
+// POST /api/auth/login/backup
+router.post(
+  "/login/backup",
+  validate(verifyMfaBackupSchema),
+  mfaLoginBackupHandler
 );
 
 // TODO: Add Login route

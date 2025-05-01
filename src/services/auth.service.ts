@@ -21,6 +21,17 @@ interface RegisterResult {
   userId: string; // Useful for potential resend logic later
 }
 
+// Login Return Type: Can be a final token, or MFA requirement info
+interface MfaRequiredPayload {
+  status: "mfa_required";
+  mfaToken: string; // Short-lived token indicating password success
+}
+interface LoginSuccessPayload {
+  status: "success";
+  userId: string; // Return userId to establish session
+}
+type LoginResult = MfaRequiredPayload | LoginSuccessPayload | null;
+
 // Updated registerUser function to use Argon2
 export const registerUser = async (
   input: RegisterInput
@@ -78,71 +89,99 @@ export const registerUser = async (
   };
 };
 
-// Updated loginUser function for dual hashing support
-export const loginUser = async (input: LoginInput): Promise<string | null> => {
+// Updated loginUser function for MFA check
+export const loginUser = async (input: LoginInput): Promise<LoginResult> => {
   const { email, password } = input;
 
   const user = await prisma.user.findUnique({
     where: { email },
+    // Select MFA fields as well
+    select: {
+      id: true,
+      email: true,
+      passwordHash: true,
+      hashingAlgorithm: true,
+      isVerified: true,
+      mfaEnabled: true,
+      // No need for mfaSecretEncrypted here, only during verification
+    },
   });
 
-  // Check if user exists AND is verified
   if (!user || !user.isVerified) {
-    // Combine user not found and not verified for security (prevents revealing if an email is registered but unverified)
     return null; // Invalid credentials or account not verified
   }
 
   let isPasswordValid = false;
   let needsRehash = false;
 
-  // Check which algorithm was used
   if (user.hashingAlgorithm === "argon2") {
     isPasswordValid = await argon2.verify(user.passwordHash, password);
   } else {
-    // Assume bcrypt for users created before the switch (or if field is missing/null)
     isPasswordValid = await bcrypt.compare(password, user.passwordHash);
-    if (isPasswordValid) {
-      // Password is valid, but uses old hashing. Mark for rehash.
-      needsRehash = true;
-    }
+    if (isPasswordValid) needsRehash = true;
   }
 
   if (!isPasswordValid) {
     return null; // Invalid password
   }
 
-  // Rehash with Argon2 if needed (after successful bcrypt login)
+  // --- Password is Valid ---
+
+  // Rehash if needed (background task, doesn't block login flow)
   if (needsRehash) {
-    try {
-      const newPasswordHash = await argon2.hash(password, {
+    argon2
+      .hash(password, {
         type: argon2.argon2id,
         memoryCost: 2 ** 16,
         timeCost: 3,
         parallelism: 1,
-      });
-      await prisma.user.update({
-        where: { email },
-        data: {
-          passwordHash: newPasswordHash,
-          hashingAlgorithm: "argon2",
-        },
-      });
-      console.log(`[Auth Service]: User ${email} password rehashed to Argon2.`);
-    } catch (rehashError) {
-      // Log error but allow login to proceed, rehashing can retry next time
-      console.error(
-        `[Auth Service]: Failed to rehash password for user ${email}:`,
-        rehashError
+      })
+      .then((newPasswordHash) => {
+        return prisma.user.update({
+          where: { email },
+          data: { passwordHash: newPasswordHash, hashingAlgorithm: "argon2" },
+        });
+      })
+      .then(() =>
+        console.log(
+          `[Auth Service]: User ${email} password rehashed to Argon2.`
+        )
+      )
+      .catch((rehashError) =>
+        console.error(
+          `[Auth Service]: Failed to rehash password for user ${email}:`,
+          rehashError
+        )
       );
-    }
   }
 
-  // User is verified and password is valid, proceed with JWT generation
-  const secret = config.JWT_SECRET;
-  const payload = { id: user.id, email: user.email };
-  const token = jwt.sign(payload, secret, { expiresIn: "1h" });
+  // --- MFA Check ---
+  if (user.mfaEnabled) {
+    // MFA is enabled, generate a short-lived MFA pending token
+    const mfaPendingSecret = config.JWT_SECRET; // Can use same secret or a different one
+    const mfaPayload = { id: user.id, purpose: "mfa-pending" }; // Add purpose
+    const mfaToken = jwt.sign(mfaPayload, mfaPendingSecret, {
+      expiresIn: "5m",
+    }); // Short expiry (e.g., 5 mins)
 
-  return token;
+    return {
+      status: "mfa_required",
+      mfaToken: mfaToken,
+    };
+  } else {
+    // MFA not enabled, signal success and return userId for session creation
+    // const finalJwtSecret = config.JWT_SECRET;
+    // const finalPayload = { id: user.id, email: user.email };
+    // const finalToken = jwt.sign(finalPayload, finalJwtSecret, {
+    //   expiresIn: "1h",
+    // });
+
+    return {
+      status: "success",
+      // token: finalToken,
+      userId: user.id, // Return userId instead of token
+    };
+  }
 };
 
 // --- Email Verification Logic ---

@@ -227,3 +227,41 @@ This document outlines the key steps taken and security considerations implement
   - **Incorrect Package:** Attempted to use non-existent `@node-rs/otp`. **Fix:** Switched to `speakeasy` based on user feedback.
   - **Self-Import:** Removed accidental self-import in `mfa.service.ts`.
   - **Express Handler Types:** Fixed return types in `mfa.controller.ts` handlers to satisfy TypeScript/Express expectations.
+
+### Phase 4.2: MFA Verification During Login
+
+- **Goal:** Require users with MFA enabled to provide a TOTP code after successful password login.
+- **Login Flow Changes:**
+  - **Service (`loginUser` in `auth.service.ts`):**
+    - Modified to fetch `mfaEnabled` field for the user.
+    - After successful password verification:
+      - If `mfaEnabled` is `false`, generates and returns the final JWT in a `{ status: 'success', token: '...' }` payload.
+      - If `mfaEnabled` is `true`, generates a **short-lived** (e.g., 5 min) "MFA pending" JWT. This JWT contains the `userId` and a `purpose: 'mfa-pending'` claim.
+      - Returns `{ status: 'mfa_required', mfaToken: '...' }` payload, containing the MFA pending token.
+    - Refactored background password rehashing to use `.then().catch()` to avoid blocking the MFA check.
+  - **Controller (`loginHandler` in `auth.controller.ts`):**
+    - Updated to check the `status` field returned by the `loginUser` service.
+    - If `status` is `'success'`, returns the final JWT.
+    - If `status` is `'mfa_required'`, returns the MFA pending token and the `mfa_required` status to the client, prompting them for the next step.
+- **MFA Verification Endpoint (`POST /api/auth/login/mfa`):**
+  - **Validation Schema (`verifyMfaLoginSchema` in `validators.ts`):** Added schema to validate `mfaToken` (string) and `totpCode` (6-digit string).
+  - **Service (`verifyLoginMfa` in `mfa.service.ts`):**
+    - Created function `verifyLoginMfa(userId, token)`.
+    - Retrieves user, checks if MFA is enabled and secret exists.
+    - Decrypts the stored base32 secret.
+    - Uses `speakeasy.totp.verify()` to validate the provided `token` against the secret (allows 1-step window for time drift).
+    - Returns `true` if valid, `false` otherwise.
+  - **Controller (`mfaLoginHandler` in `auth.controller.ts`):**
+    - Verifies the received `mfaToken` (short-lived JWT) using `jwt.verify()` and checks its `purpose` claim.
+    - If valid, extracts the `userId`.
+    - Calls `verifyLoginMfa(userId, totpCode)`.
+    - If TOTP code is valid, generates the **final** JWT (same as non-MFA login).
+    - Returns the final JWT (`200 OK`) or an appropriate error (`401 Unauthorized`).
+  - **Route (`auth.routes.ts`):** Added route `POST /api/auth/login/mfa` pointing to `mfaLoginHandler`, applying the `verifyMfaLoginSchema` validation.
+- **Security:**
+  - Separates password verification from TOTP verification.
+  - Uses a short-lived, single-purpose JWT (`mfaToken`) to link the two steps securely.
+  - Final access token is only issued after _both_ password and TOTP are successfully verified.
+- **Errors Encountered & Fixes:**
+  - **Forward Reference:** Initially added the `/api/auth/login/mfa` route before its validation schema (`VerifyMfaLoginInput`) and controller handler (`mfaLoginHandler`) were created/exported, causing linter errors.
+    - **Fix:** Created the schema and exported the handler before adding the route definition.

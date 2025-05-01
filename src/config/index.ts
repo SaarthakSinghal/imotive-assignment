@@ -8,6 +8,7 @@ dotenv.config();
 const envSchema = z.object({
   DATABASE_URL: z.string().url(),
   JWT_SECRET: z.string().min(1, "JWT_SECRET must be defined"),
+  SESSION_SECRET: z.string().min(1, "SESSION_SECRET must be defined"),
   MFA_ENCRYPTION_KEY: z
     .string()
     .min(32, "MFA_ENCRYPTION_KEY must be at least 32 characters"),

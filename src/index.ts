@@ -1,5 +1,7 @@
 import express, { Express, Request, Response } from "express";
 import rateLimit from "express-rate-limit"; // Import rate limiter
+import session from "express-session"; // Import session
+import { sessionOptions } from "./config/session.config"; // Import session config
 import config from "./config"; // Import centralized config
 import authRoutes from "./routes/auth.routes"; // Import auth routes
 import mfaRoutes from "./routes/mfa.routes"; // Import MFA routes
@@ -16,6 +18,9 @@ const limiter = rateLimit({
   message: "Too many requests from this IP, please try again after 15 minutes", // Optional custom message
 });
 app.use(limiter);
+
+// Configure session middleware
+app.use(session(sessionOptions));
 
 app.use(express.json()); // Middleware to parse JSON bodies
 
