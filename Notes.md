@@ -158,3 +158,72 @@ This document outlines the key steps taken and security considerations implement
   - Argon2id provides stronger password hashing.
   - Progressive rehashing ensures older accounts are seamlessly upgraded to the more secure hashing algorithm upon their next successful login, without disrupting users.
 - **Errors Encountered & Fixes:** None significant in this subphase beyond ensuring Prisma Client was regenerated after schema changes.
+
+### Phase 3.2: Forgot/Reset Password Flow
+
+- **Goal:** Allow users to securely reset their password if they forget it.
+- **Schema Changes (`prisma/schema.prisma`):**
+  - Added a `PasswordResetToken` model (`id`, `token` (unique), `expiresAt`, `userId` (relation to `User`), `createdAt`).
+  - Added the `passwordResetTokens` relation field to the `User` model.
+  - Applied changes using `prisma migrate dev --name add_password_reset`.
+  - Regenerated Prisma Client (`npx prisma generate`).
+- **Request Reset Endpoint (`POST /api/auth/forgot-password`):**
+  - **Validation:** Uses `forgotPasswordSchema` to validate the email in the request body.
+  - **Service (`requestPasswordReset`):**
+    - Finds user by email.
+    - **Security:** If user not found, logs internally and returns _without_ error to prevent email enumeration.
+    - Generates a secure token (`crypto.randomBytes`).
+    - Sets a 1-hour expiry for the token.
+    - Uses a transaction to delete any old reset tokens for the user and create the new one.
+    - Includes a `console.log` placeholder for the token (actual email sending deferred).
+  - **Controller (`forgotPasswordHandler`):** Calls the service and _always_ returns a generic `200 OK` success message, regardless of whether the email existed or an internal error occurred during token generation (again, to prevent enumeration).
+- **Reset Password Endpoint (`POST /api/auth/reset-password`):**
+  - **Validation:** Uses `resetPasswordSchema` to validate the `token` and new `password` (min 8 chars) in the request body.
+  - **Service (`resetPassword`):**
+    - Finds the `PasswordResetToken` record by the provided token.
+    - Checks if the token exists and has not expired.
+    - If valid, hashes the new password using `argon2.hash()`.
+    - Uses a transaction to:
+      - Update the corresponding user's `passwordHash` and set `hashingAlgorithm` to `'argon2'`.
+      - Delete the used `PasswordResetToken`.
+    - Returns `true` on success, `false` otherwise.
+  - **Controller (`resetPasswordHandler`):** Calls the service and returns `200 OK` on success, or `400 Bad Request` if the token was invalid/expired or the transaction failed.
+- **Security:**
+  - Uses secure, random, single-use tokens with a short expiry (1 hour).
+  - Protects against email enumeration on the forgot password endpoint.
+  - Uses transactions for atomic updates (password change + token deletion).
+- **Errors Encountered & Fixes:** None significant in this subphase.
+
+### Phase 4.1: MFA Enrollment (TOTP Setup)
+
+- **Goal:** Allow users to enable Time-based One-Time Password (TOTP) using authenticator apps.
+- **Library Correction:** Initially attempted to use `@node-rs/otp`, but this package does not exist on npm. Switched to the standard `speakeasy` library (`npm install speakeasy @types/speakeasy`). Also requires `qrcode` and `@types/qrcode`.
+- **Configuration (`.env`, `src/config/index.ts`):**
+  - Added `MFA_ENCRYPTION_KEY` environment variable (expected 32 bytes / 64 hex chars).
+  - Updated config schema to validate the presence and minimum length of `MFA_ENCRYPTION_KEY`.
+- **Schema Changes (`prisma/schema.prisma`):**
+  - Added `mfaEnabled: Boolean @default(false)` to `User` model.
+  - Added `mfaSecretEncrypted: String?` (nullable) to `User` model to store the encrypted secret.
+  - Applied changes using `prisma migrate dev --name add_mfa_fields`.
+  - Regenerated Prisma Client (`npx prisma generate`).
+- **MFA Service (`src/services/mfa.service.ts`):**
+  - Implemented helper functions `encryptMfaSecret` and `decryptMfaSecret` using Node.js `crypto` (AES-256-GCM).
+  - Refactored `generateMfaSetup(userId, email)` function:
+    - Uses `speakeasy.generateSecret({ name: ..., issuer: ... })` to create a new secret object.
+    - Encrypts the **base32** encoded secret (`secret.base32`) for storage.
+    - Updates the user record with `mfaSecretEncrypted`, ensuring `mfaEnabled` is `false`.
+    - Returns the `otpauth_url` provided by `speakeasy` (e.g., `secret.otpauth_url`).
+  - Refactored `verifyMfaSetup(userId, token)` function:
+    - Retrieves and decrypts the user's stored **base32** secret.
+    - Uses `speakeasy.totp.verify({ secret: decryptedBase32Secret, encoding: 'base32', token: ..., window: 1 })` to validate the token.
+    - If valid, updates the user record setting `mfaEnabled = true`.
+- **MFA Controller (`src/controllers/mfa.controller.ts`):**
+  - No functional changes needed after switching to `speakeasy` (still generates QR from URL and verifies token).
+  - Fixed handler return types by adding explicit `return;` after sending responses, resolving linter errors.
+- **MFA Routes (`src/routes/mfa.routes.ts`):**
+  - No functional changes needed.
+  - Includes placeholder auth middleware injecting test user ID/email (**NOTE: Insecure**).
+- **Errors Encountered & Fixes:**
+  - **Incorrect Package:** Attempted to use non-existent `@node-rs/otp`. **Fix:** Switched to `speakeasy` based on user feedback.
+  - **Self-Import:** Removed accidental self-import in `mfa.service.ts`.
+  - **Express Handler Types:** Fixed return types in `mfa.controller.ts` handlers to satisfy TypeScript/Express expectations.

@@ -127,7 +127,9 @@ exports.Prisma.UserScalarFieldEnum = {
   hashingAlgorithm: 'hashingAlgorithm',
   isVerified: 'isVerified',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  mfaEnabled: 'mfaEnabled',
+  mfaSecretEncrypted: 'mfaSecretEncrypted'
 };
 
 exports.Prisma.VerificationTokenScalarFieldEnum = {
@@ -154,6 +156,11 @@ exports.Prisma.SortOrder = {
 exports.Prisma.QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
+};
+
+exports.Prisma.NullsOrder = {
+  first: 'first',
+  last: 'last'
 };
 
 

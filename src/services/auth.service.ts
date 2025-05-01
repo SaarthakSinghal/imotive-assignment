@@ -3,7 +3,12 @@ import bcrypt from "bcrypt";
 import argon2 from "argon2"; // Import argon2
 import jwt from "jsonwebtoken";
 import crypto from "crypto"; // Import crypto for token generation
-import { RegisterInput, LoginInput } from "../utils/validators";
+import {
+  RegisterInput,
+  LoginInput,
+  ForgotPasswordInput,
+  ResetPasswordInput,
+} from "../utils/validators";
 import config from "../config"; // Import centralized config
 
 const prisma = new PrismaClient();
@@ -182,6 +187,113 @@ export const verifyEmailToken = async (token: string): Promise<boolean> => {
     return true; // Verification successful
   } catch (error) {
     console.error("Error during email verification transaction:", error);
+    return false; // Transaction failed
+  }
+};
+
+// --- Password Reset Request Logic ---
+
+export const requestPasswordReset = async (
+  input: ForgotPasswordInput
+): Promise<void> => {
+  const { email } = input;
+
+  // Find the user by email
+  const user = await prisma.user.findUnique({ where: { email } });
+
+  // IMPORTANT: If user not found, DO NOT throw an error.
+  // Respond with a generic success message to prevent email enumeration attacks.
+  if (!user) {
+    console.log(
+      `[Auth Service]: Password reset requested for non-existent email: ${email}`
+    );
+    return; // Pretend success
+  }
+
+  // TODO: Consider adding rate limiting specific to this user/email for reset requests.
+
+  // Generate a secure password reset token
+  const resetToken = crypto.randomBytes(32).toString("hex");
+  const tokenExpiry = new Date(Date.now() + 60 * 60 * 1000); // Token expires in 1 hour
+
+  // Store the token (consider deleting any previous tokens for this user)
+  // Using a transaction to delete old and create new
+  try {
+    await prisma.$transaction(async (tx) => {
+      // Delete existing reset tokens for this user
+      await tx.passwordResetToken.deleteMany({
+        where: { userId: user.id },
+      });
+      // Create the new token
+      await tx.passwordResetToken.create({
+        data: {
+          token: resetToken,
+          expiresAt: tokenExpiry,
+          userId: user.id,
+        },
+      });
+    });
+
+    // TODO: Send password reset email with the token
+    // Example URL: https://yourapp.com/reset-password?token=RESET_TOKEN
+    console.log(`Password Reset Token for ${email}: ${resetToken}`); // Placeholder
+  } catch (error) {
+    console.error(
+      `[Auth Service]: Failed to create password reset token for ${email}:`,
+      error
+    );
+    // Don't throw error to the user, still pretend success to prevent info leak
+  }
+
+  // Always return void (representing generic success)
+  return;
+};
+
+// --- Password Reset Logic ---
+
+export const resetPassword = async (
+  input: ResetPasswordInput
+): Promise<boolean> => {
+  const { token, password } = input;
+
+  // Find the reset token
+  const resetRecord = await prisma.passwordResetToken.findUnique({
+    where: { token },
+  });
+
+  // Check if token exists and hasn't expired
+  if (!resetRecord || resetRecord.expiresAt < new Date()) {
+    return false; // Token invalid or expired
+  }
+
+  // Token is valid, hash the new password using Argon2
+  const newPasswordHash = await argon2.hash(password, {
+    type: argon2.argon2id,
+    memoryCost: 2 ** 16,
+    timeCost: 3,
+    parallelism: 1,
+  });
+
+  // Update user password and delete the token in a transaction
+  try {
+    await prisma.$transaction(async (tx) => {
+      // 1. Update user password and algorithm
+      await tx.user.update({
+        where: { id: resetRecord.userId },
+        data: {
+          passwordHash: newPasswordHash,
+          hashingAlgorithm: "argon2", // Ensure algorithm is set to argon2
+        },
+      });
+
+      // 2. Delete the used reset token
+      await tx.passwordResetToken.delete({
+        where: { id: resetRecord.id },
+      });
+    });
+    return true; // Password reset successful
+  } catch (error) {
+    console.error("Error during password reset transaction:", error);
     return false; // Transaction failed
   }
 };

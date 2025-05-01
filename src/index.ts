@@ -2,6 +2,7 @@ import express, { Express, Request, Response } from "express";
 import rateLimit from "express-rate-limit"; // Import rate limiter
 import config from "./config"; // Import centralized config
 import authRoutes from "./routes/auth.routes"; // Import auth routes
+import mfaRoutes from "./routes/mfa.routes"; // Import MFA routes
 
 const app: Express = express();
 const port = config.PORT;
@@ -24,6 +25,9 @@ app.get("/", (req: Request, res: Response) => {
 
 // Mount Auth routes
 app.use("/api/auth", authRoutes);
+
+// Mount MFA routes
+app.use("/api/mfa", mfaRoutes);
 
 // TODO: Add Auth routes
 

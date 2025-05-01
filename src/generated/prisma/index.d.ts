@@ -1108,6 +1108,8 @@ export namespace Prisma {
     isVerified: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
+    mfaEnabled: boolean | null
+    mfaSecretEncrypted: string | null
   }
 
   export type UserMaxAggregateOutputType = {
@@ -1118,6 +1120,8 @@ export namespace Prisma {
     isVerified: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
+    mfaEnabled: boolean | null
+    mfaSecretEncrypted: string | null
   }
 
   export type UserCountAggregateOutputType = {
@@ -1128,6 +1132,8 @@ export namespace Prisma {
     isVerified: number
     createdAt: number
     updatedAt: number
+    mfaEnabled: number
+    mfaSecretEncrypted: number
     _all: number
   }
 
@@ -1140,6 +1146,8 @@ export namespace Prisma {
     isVerified?: true
     createdAt?: true
     updatedAt?: true
+    mfaEnabled?: true
+    mfaSecretEncrypted?: true
   }
 
   export type UserMaxAggregateInputType = {
@@ -1150,6 +1158,8 @@ export namespace Prisma {
     isVerified?: true
     createdAt?: true
     updatedAt?: true
+    mfaEnabled?: true
+    mfaSecretEncrypted?: true
   }
 
   export type UserCountAggregateInputType = {
@@ -1160,6 +1170,8 @@ export namespace Prisma {
     isVerified?: true
     createdAt?: true
     updatedAt?: true
+    mfaEnabled?: true
+    mfaSecretEncrypted?: true
     _all?: true
   }
 
@@ -1243,6 +1255,8 @@ export namespace Prisma {
     isVerified: boolean
     createdAt: Date
     updatedAt: Date
+    mfaEnabled: boolean
+    mfaSecretEncrypted: string | null
     _count: UserCountAggregateOutputType | null
     _min: UserMinAggregateOutputType | null
     _max: UserMaxAggregateOutputType | null
@@ -1270,6 +1284,8 @@ export namespace Prisma {
     isVerified?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    mfaEnabled?: boolean
+    mfaSecretEncrypted?: boolean
     verificationTokens?: boolean | User$verificationTokensArgs<ExtArgs>
     passwordResetTokens?: boolean | User$passwordResetTokensArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
@@ -1283,6 +1299,8 @@ export namespace Prisma {
     isVerified?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    mfaEnabled?: boolean
+    mfaSecretEncrypted?: boolean
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -1293,6 +1311,8 @@ export namespace Prisma {
     isVerified?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    mfaEnabled?: boolean
+    mfaSecretEncrypted?: boolean
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectScalar = {
@@ -1303,9 +1323,11 @@ export namespace Prisma {
     isVerified?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    mfaEnabled?: boolean
+    mfaSecretEncrypted?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "passwordHash" | "hashingAlgorithm" | "isVerified" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "passwordHash" | "hashingAlgorithm" | "isVerified" | "createdAt" | "updatedAt" | "mfaEnabled" | "mfaSecretEncrypted", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     verificationTokens?: boolean | User$verificationTokensArgs<ExtArgs>
     passwordResetTokens?: boolean | User$passwordResetTokensArgs<ExtArgs>
@@ -1328,6 +1350,8 @@ export namespace Prisma {
       isVerified: boolean
       createdAt: Date
       updatedAt: Date
+      mfaEnabled: boolean
+      mfaSecretEncrypted: string | null
     }, ExtArgs["result"]["user"]>
     composites: {}
   }
@@ -1760,6 +1784,8 @@ export namespace Prisma {
     readonly isVerified: FieldRef<"User", 'Boolean'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
+    readonly mfaEnabled: FieldRef<"User", 'Boolean'>
+    readonly mfaSecretEncrypted: FieldRef<"User", 'String'>
   }
     
 
@@ -4351,7 +4377,9 @@ export namespace Prisma {
     hashingAlgorithm: 'hashingAlgorithm',
     isVerified: 'isVerified',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    updatedAt: 'updatedAt',
+    mfaEnabled: 'mfaEnabled',
+    mfaSecretEncrypted: 'mfaSecretEncrypted'
   };
 
   export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -4393,6 +4421,14 @@ export namespace Prisma {
   };
 
   export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+  export const NullsOrder: {
+    first: 'first',
+    last: 'last'
+  };
+
+  export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 
 
   /**
@@ -4463,6 +4499,8 @@ export namespace Prisma {
     isVerified?: BoolFilter<"User"> | boolean
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
+    mfaEnabled?: BoolFilter<"User"> | boolean
+    mfaSecretEncrypted?: StringNullableFilter<"User"> | string | null
     verificationTokens?: VerificationTokenListRelationFilter
     passwordResetTokens?: PasswordResetTokenListRelationFilter
   }
@@ -4475,6 +4513,8 @@ export namespace Prisma {
     isVerified?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    mfaEnabled?: SortOrder
+    mfaSecretEncrypted?: SortOrderInput | SortOrder
     verificationTokens?: VerificationTokenOrderByRelationAggregateInput
     passwordResetTokens?: PasswordResetTokenOrderByRelationAggregateInput
   }
@@ -4490,6 +4530,8 @@ export namespace Prisma {
     isVerified?: BoolFilter<"User"> | boolean
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
+    mfaEnabled?: BoolFilter<"User"> | boolean
+    mfaSecretEncrypted?: StringNullableFilter<"User"> | string | null
     verificationTokens?: VerificationTokenListRelationFilter
     passwordResetTokens?: PasswordResetTokenListRelationFilter
   }, "id" | "email">
@@ -4502,6 +4544,8 @@ export namespace Prisma {
     isVerified?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    mfaEnabled?: SortOrder
+    mfaSecretEncrypted?: SortOrderInput | SortOrder
     _count?: UserCountOrderByAggregateInput
     _max?: UserMaxOrderByAggregateInput
     _min?: UserMinOrderByAggregateInput
@@ -4518,6 +4562,8 @@ export namespace Prisma {
     isVerified?: BoolWithAggregatesFilter<"User"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
+    mfaEnabled?: BoolWithAggregatesFilter<"User"> | boolean
+    mfaSecretEncrypted?: StringNullableWithAggregatesFilter<"User"> | string | null
   }
 
   export type VerificationTokenWhereInput = {
@@ -4638,6 +4684,8 @@ export namespace Prisma {
     isVerified?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    mfaEnabled?: boolean
+    mfaSecretEncrypted?: string | null
     verificationTokens?: VerificationTokenCreateNestedManyWithoutUserInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
   }
@@ -4650,6 +4698,8 @@ export namespace Prisma {
     isVerified?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    mfaEnabled?: boolean
+    mfaSecretEncrypted?: string | null
     verificationTokens?: VerificationTokenUncheckedCreateNestedManyWithoutUserInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   }
@@ -4662,6 +4712,8 @@ export namespace Prisma {
     isVerified?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    mfaEnabled?: BoolFieldUpdateOperationsInput | boolean
+    mfaSecretEncrypted?: NullableStringFieldUpdateOperationsInput | string | null
     verificationTokens?: VerificationTokenUpdateManyWithoutUserNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
   }
@@ -4674,6 +4726,8 @@ export namespace Prisma {
     isVerified?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    mfaEnabled?: BoolFieldUpdateOperationsInput | boolean
+    mfaSecretEncrypted?: NullableStringFieldUpdateOperationsInput | string | null
     verificationTokens?: VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   }
@@ -4686,6 +4740,8 @@ export namespace Prisma {
     isVerified?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    mfaEnabled?: boolean
+    mfaSecretEncrypted?: string | null
   }
 
   export type UserUpdateManyMutationInput = {
@@ -4696,6 +4752,8 @@ export namespace Prisma {
     isVerified?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    mfaEnabled?: BoolFieldUpdateOperationsInput | boolean
+    mfaSecretEncrypted?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type UserUncheckedUpdateManyInput = {
@@ -4706,6 +4764,8 @@ export namespace Prisma {
     isVerified?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    mfaEnabled?: BoolFieldUpdateOperationsInput | boolean
+    mfaSecretEncrypted?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type VerificationTokenCreateInput = {
@@ -4849,6 +4909,21 @@ export namespace Prisma {
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
+  export type StringNullableFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedStringNullableFilter<$PrismaModel> | string | null
+  }
+
   export type VerificationTokenListRelationFilter = {
     every?: VerificationTokenWhereInput
     some?: VerificationTokenWhereInput
@@ -4859,6 +4934,11 @@ export namespace Prisma {
     every?: PasswordResetTokenWhereInput
     some?: PasswordResetTokenWhereInput
     none?: PasswordResetTokenWhereInput
+  }
+
+  export type SortOrderInput = {
+    sort: SortOrder
+    nulls?: NullsOrder
   }
 
   export type VerificationTokenOrderByRelationAggregateInput = {
@@ -4877,6 +4957,8 @@ export namespace Prisma {
     isVerified?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    mfaEnabled?: SortOrder
+    mfaSecretEncrypted?: SortOrder
   }
 
   export type UserMaxOrderByAggregateInput = {
@@ -4887,6 +4969,8 @@ export namespace Prisma {
     isVerified?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    mfaEnabled?: SortOrder
+    mfaSecretEncrypted?: SortOrder
   }
 
   export type UserMinOrderByAggregateInput = {
@@ -4897,6 +4981,8 @@ export namespace Prisma {
     isVerified?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    mfaEnabled?: SortOrder
+    mfaSecretEncrypted?: SortOrder
   }
 
   export type StringWithAggregatesFilter<$PrismaModel = never> = {
@@ -4937,6 +5023,24 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedDateTimeFilter<$PrismaModel>
     _max?: NestedDateTimeFilter<$PrismaModel>
+  }
+
+  export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
   export type UserScalarRelationFilter = {
@@ -5030,6 +5134,10 @@ export namespace Prisma {
 
   export type DateTimeFieldUpdateOperationsInput = {
     set?: Date | string
+  }
+
+  export type NullableStringFieldUpdateOperationsInput = {
+    set?: string | null
   }
 
   export type VerificationTokenUpdateManyWithoutUserNestedInput = {
@@ -5146,6 +5254,20 @@ export namespace Prisma {
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
+  export type NestedStringNullableFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedStringNullableFilter<$PrismaModel> | string | null
+  }
+
   export type NestedStringWithAggregatesFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -5194,6 +5316,34 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedDateTimeFilter<$PrismaModel>
     _max?: NestedDateTimeFilter<$PrismaModel>
+  }
+
+  export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
+  }
+
+  export type NestedIntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
   export type VerificationTokenCreateWithoutUserInput = {
@@ -5306,6 +5456,8 @@ export namespace Prisma {
     isVerified?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    mfaEnabled?: boolean
+    mfaSecretEncrypted?: string | null
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
   }
 
@@ -5317,6 +5469,8 @@ export namespace Prisma {
     isVerified?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    mfaEnabled?: boolean
+    mfaSecretEncrypted?: string | null
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -5344,6 +5498,8 @@ export namespace Prisma {
     isVerified?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    mfaEnabled?: BoolFieldUpdateOperationsInput | boolean
+    mfaSecretEncrypted?: NullableStringFieldUpdateOperationsInput | string | null
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
   }
 
@@ -5355,6 +5511,8 @@ export namespace Prisma {
     isVerified?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    mfaEnabled?: BoolFieldUpdateOperationsInput | boolean
+    mfaSecretEncrypted?: NullableStringFieldUpdateOperationsInput | string | null
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -5366,6 +5524,8 @@ export namespace Prisma {
     isVerified?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    mfaEnabled?: boolean
+    mfaSecretEncrypted?: string | null
     verificationTokens?: VerificationTokenCreateNestedManyWithoutUserInput
   }
 
@@ -5377,6 +5537,8 @@ export namespace Prisma {
     isVerified?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    mfaEnabled?: boolean
+    mfaSecretEncrypted?: string | null
     verificationTokens?: VerificationTokenUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -5404,6 +5566,8 @@ export namespace Prisma {
     isVerified?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    mfaEnabled?: BoolFieldUpdateOperationsInput | boolean
+    mfaSecretEncrypted?: NullableStringFieldUpdateOperationsInput | string | null
     verificationTokens?: VerificationTokenUpdateManyWithoutUserNestedInput
   }
 
@@ -5415,6 +5579,8 @@ export namespace Prisma {
     isVerified?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    mfaEnabled?: BoolFieldUpdateOperationsInput | boolean
+    mfaSecretEncrypted?: NullableStringFieldUpdateOperationsInput | string | null
     verificationTokens?: VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   }
 

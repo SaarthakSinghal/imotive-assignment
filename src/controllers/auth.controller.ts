@@ -3,8 +3,15 @@ import {
   registerUser,
   loginUser,
   verifyEmailToken,
+  requestPasswordReset,
+  resetPassword,
 } from "../services/auth.service";
-import { RegisterInput, LoginInput } from "../utils/validators";
+import {
+  RegisterInput,
+  LoginInput,
+  ForgotPasswordInput,
+  ResetPasswordInput,
+} from "../utils/validators";
 
 export const registerHandler = async (
   // Explicitly type req.body using RegisterInput
@@ -105,6 +112,61 @@ export const verifyEmailHandler = async (req: Request, res: Response) => {
     }
   } catch (error) {
     console.error("Email Verification Error:", error);
+    res.status(500).json({ status: "error", message: "Internal Server Error" });
+    return; // Explicitly return void
+  }
+};
+
+// --- Forgot Password Handler ---
+export const forgotPasswordHandler = async (
+  // Use ForgotPasswordInput for validation
+  req: Request<{}, {}, ForgotPasswordInput>,
+  res: Response
+) => {
+  try {
+    await requestPasswordReset(req.body);
+
+    // Always return a generic success response
+    res.status(200).json({
+      status: "success",
+      message:
+        "If an account with that email exists, a password reset link has been sent.",
+    });
+  } catch (error) {
+    // Log unexpected errors but still return generic success to user
+    console.error("Forgot Password Error:", error);
+    res.status(200).json({
+      // Still 200 OK
+      status: "success",
+      message:
+        "If an account with that email exists, a password reset link has been sent.",
+    });
+  }
+};
+
+// --- Reset Password Handler ---
+export const resetPasswordHandler = async (
+  // Use ResetPasswordInput for validation
+  req: Request<{}, {}, ResetPasswordInput>,
+  res: Response
+) => {
+  try {
+    const success = await resetPassword(req.body);
+
+    if (success) {
+      res
+        .status(200)
+        .json({ status: "success", message: "Password reset successfully." });
+    } else {
+      // Token invalid, expired, or DB error during transaction
+      res.status(400).json({
+        status: "fail",
+        message: "Invalid or expired password reset token.",
+      });
+    }
+    return; // Explicitly return void
+  } catch (error) {
+    console.error("Reset Password Error:", error);
     res.status(500).json({ status: "error", message: "Internal Server Error" });
     return; // Explicitly return void
   }
