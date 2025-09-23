@@ -89,9 +89,9 @@ Robust authentication service with sessions, email verification, password resets
     **If using Docker for PostgreSQL**
 
     While configuring the database in Docker, name the environment variables as:
-    - `POSTGRES_USER`=<username>
-    - `POSTGRES_PASSWORD`=<password>
-    - (optional) `POSTGRES_DB`=<db_name> (defaults to same as `POSTGRES_USER`)
+    - `POSTGRES_USER`= `<username>`
+    - `POSTGRES_PASSWORD`= `<password>`
+    - (optional) `POSTGRES_DB`= `<db_name>` (defaults to same as `POSTGRES_USER`)
 
     Run the container:
 
