@@ -316,12 +316,12 @@ Response(200 OK):
   "status": "success",
   "message": "MFA enabled successfully. Save your backup codes!",
   "data": {
-    "backupCodes": <List of 10 backup codes>
+    "backupCodes": "<List of 10 backup codes>"
   }
 }
 ```
 
-#### 7a) Login with MFA: verify TOTP using the temporary mfaToken
+#### 7A) Login with MFA: verify TOTP using the temporary mfaToken
 
 Using curl:
 
@@ -361,7 +361,7 @@ Response(200 OK):
 > [!NOTE]
 > The `mfaToken` is returned in the response of `/api/auth/login` when MFA is enabled.
 
-#### 7b) Login with backup code
+#### 7B) Login with backup code
 
 Using curl:
 
@@ -478,4 +478,4 @@ PRs are welcome. Please keep code typed, validated at boundaries, and add tests 
 
 ## License
 
-ISC
+This project is licensed under the MIT License – see the [LICENSE](./LICENSE) file for details.
