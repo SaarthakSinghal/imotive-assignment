@@ -63,46 +63,46 @@ auth-system/
 
 1. Prerequisites
 
-- Node.js 18+
-- PostgreSQL (DATABASE_URL)
+    - Node.js 18+
+    - PostgreSQL (DATABASE_URL)
 
 2. Install
 
-```bash
-npm install
-```
+    ```bash
+    npm install
+    ```
 
 3. Environment
 
-Create `.env` with:
-
-```
-DATABASE_URL=postgres://user:pass@host:5432/db
-JWT_SECRET=change_me
-SESSION_SECRET=change_me
-MFA_ENCRYPTION_KEY=<64 hex chars (32 bytes)>  # required for AES-256-GCM
-PORT=3000
-```
-
-Notes:
-
-- `MFA_ENCRYPTION_KEY` must be exactly 32 bytes (64 hex characters) or MFA setup will fail.
+    Create `.env` with:
+    
+    ```
+    DATABASE_URL=postgres://user:pass@host:5432/db
+    JWT_SECRET=change_me
+    SESSION_SECRET=change_me
+    MFA_ENCRYPTION_KEY=<64 hex chars (32 bytes)>  # required for AES-256-GCM
+    PORT=3000
+    ```
+    
+    Notes:
+    
+    - `MFA_ENCRYPTION_KEY` must be exactly 32 bytes (64 hex characters) or MFA setup will fail.
 
 4. Database
 
-```bash
-npx prisma migrate dev
-npx prisma generate
-```
+    ```bash
+    npx prisma migrate dev
+    npx prisma generate
+    ```
 
 5. Run
 
-```bash
-npm run dev   # development
-npm run build && npm start   # production
-```
-
-Server runs at `http://localhost:3000` by default.
+    ```bash
+    npm run dev   # development
+    npm run build && npm start   # production
+    ```
+    
+    Server runs at `http://localhost:3000` by default.
 
 
 ## Usage/Examples
@@ -316,12 +316,12 @@ Response(200 OK):
   "status": "success",
   "message": "MFA enabled successfully. Save your backup codes!",
   "data": {
-    "backupCodes": [ ... ]
+    "backupCodes": "<List of 10 backup codes>"
   }
 }
 ```
 
-#### 7a) Login with MFA: verify TOTP using the temporary mfaToken
+#### 7A) Login with MFA: verify TOTP using the temporary mfaToken
 
 Using curl:
 
@@ -361,7 +361,7 @@ Response(200 OK):
 > [!NOTE]
 > The `mfaToken` is returned in the response of `/api/auth/login` when MFA is enabled.
 
-#### 7b) Login with backup code
+#### 7B) Login with backup code
 
 Using curl:
 
@@ -478,4 +478,4 @@ PRs are welcome. Please keep code typed, validated at boundaries, and add tests 
 
 ## License
 
-ISC
+This project is licensed under the MIT License – see the [LICENSE](./LICENSE) file for details.
