@@ -1,158 +1,481 @@
-# Advanced Authentication System
+## Auth System
 
-A secure and robust user authentication system built with Node.js, Express, TypeScript, and Prisma.
-
-## Features
-
-- **User Registration:** Allows new users to sign up.
-- **User Login:** Authenticates existing users using email and password.
-- **Password Hashing:** Securely hashes passwords using Argon2id.
-- **JWT Authentication:** Uses JSON Web Tokens for session management.
-- **Email Verification:** Sends verification emails to new users.
-- **Password Reset:** Allows users to reset their passwords securely via email.
-- **Rate Limiting:** Protects against brute-force attacks on authentication endpoints.
-- **TypeScript:** Built with TypeScript for type safety and better developer experience.
-- **Prisma ORM:** Uses Prisma for database interactions.
+Robust authentication service with sessions, email verification, password resets, and MFA (TOTP + backup codes). Built with Express, TypeScript, and Prisma on PostgreSQL.
 
 ## Tech Stack
 
-- **Backend:** Node.js, Express.js
-- **Language:** TypeScript
-- **Database ORM:** Prisma
-- **Password Hashing:** Argon2id (`argon2`)
-- **Authentication:** JSON Web Tokens (`jsonwebtoken`)
-- **Email:** Nodemailer (or similar, depending on implementation)
-- **Validation:** Zod (or similar, depending on implementation)
-- **Rate Limiting:** `express-rate-limit`
+- **Language**: TypeScript (Node.js)
+- **Framework**: Express 5
+- **Database**: PostgreSQL (Prisma ORM)
+- **Auth/session**: express-session + connect-pg-simple (DB-backed sessions)
+- **Crypto**: argon2 (argon2id), bcrypt (for legacy/backup codes)
+- **Validation**: Zod
+- **Rate limiting**: express-rate-limit
+- **2FA (TOTP)**: speakeasy, qrcode
+- **CSRF**: csurf
 
-## Project Structure
+## Features
+
+- **Email/password auth** with Argon2id hashing and progressive rehash from bcrypt
+- **Email verification** via single-use token before login is allowed
+- **Password reset** with single-use token and one-hour expiry
+- **MFA (TOTP)** enable/verify flow with AES-256-GCM encrypted TOTP secret
+- **Backup codes** (hashed, single-use) for MFA recovery
+- **Session-based auth** using secure, httpOnly cookies stored in PostgreSQL
+- **CSRF protection** for state-changing requests
+- **Global rate limiting** to reduce brute-force/abuse
+- **Strong input validation** with clear error responses
+
+## Project Tree Structure
 
 ```
 auth-system/
-├── prisma/                 # Prisma schema, migrations, and client
+├── prisma/
 │   ├── schema.prisma
 │   └── migrations/
-├── src/                    # Source code
-│   ├── config/             # Configuration files (e.g., environment variables)
-│   ├── controllers/        # Request handlers
-│   ├── middleware/         # Express middleware (auth, rate limiting, validation)
-│   ├── models/             # Database models (interfaces/types, possibly Prisma generated types)
-│   ├── routes/             # API route definitions
-│   ├── services/           # Business logic
-│   ├── utils/              # Utility functions (email, tokens, etc.)
-│   └── server.ts           # Express application entry point
-├── .env.example            # Example environment variables file
-├── .gitignore
+├── src/
+│   ├── config/
+│   │   ├── index.ts
+│   │   └── session.config.ts
+│   ├── controllers/
+│   │   ├── auth.controller.ts
+│   │   └── mfa.controller.ts
+│   ├── generated/
+│   │   └── prisma/ ...
+│   ├── middleware/
+│   │   ├── auth.middleware.ts
+│   │   └── validate.ts
+│   ├── routes/
+│   │   ├── auth.routes.ts
+│   │   └── mfa.routes.ts
+│   ├── services/
+│   │   ├── auth.service.ts
+│   │   └── mfa.service.ts
+│   ├── utils/
+│   │   └── validators.ts
+│   └── index.ts
 ├── package.json
 ├── tsconfig.json
 └── README.md
 ```
 
-_(Note: This is a typical structure; adjust based on the actual project layout.)_
+## Installation & Setup
 
-## Setup
+1. Prerequisites
 
-1.  **Prerequisites:**
+- Node.js 18+
+- PostgreSQL (DATABASE_URL)
 
-    - Node.js (v18 or later recommended)
-    - npm or yarn
-    - A database supported by Prisma (e.g., PostgreSQL, MySQL, SQLite)
-    - An SMTP server or email service (for email verification and password reset)
+2. Install
 
-2.  **Clone the Repository:**
+```bash
+npm install
+```
 
-    ```bash
-    git clone <repository-url>
-    cd auth-system
-    ```
+3. Environment
 
-3.  **Install Dependencies:**
+Create `.env` with:
 
-    ```bash
-    npm install
-    # or
-    yarn install
-    ```
+```
+DATABASE_URL=postgres://user:pass@host:5432/db
+JWT_SECRET=change_me
+SESSION_SECRET=change_me
+MFA_ENCRYPTION_KEY=<64 hex chars (32 bytes)>  # required for AES-256-GCM
+PORT=3000
+```
 
-4.  **Set Up Environment Variables:**
+Notes:
 
-    - Copy the example environment file:
-      ```bash
-      cp .env.example .env
-      ```
-    - Edit the `.env` file and provide necessary values for:
-      - `DATABASE_URL`: Your database connection string (see [Prisma docs](https://www.prisma.io/docs/reference/database-reference/connection-urls))
-      - `JWT_SECRET`: A strong secret key for signing JWTs.
-      - `JWT_EXPIRATION`: JWT expiration time (e.g., `1h`, `7d`).
-      - `PORT`: The port the server will run on (e.g., `3000`).
-      - `EMAIL_HOST`: SMTP host.
-      - `EMAIL_PORT`: SMTP port.
-      - `EMAIL_USER`: SMTP username.
-      - `EMAIL_PASS`: SMTP password.
-      - `EMAIL_FROM`: Default "from" address for emails.
-      - `CLIENT_URL`: The base URL of your frontend application (used in email links).
+- `MFA_ENCRYPTION_KEY` must be exactly 32 bytes (64 hex characters) or MFA setup will fail.
 
-5.  **Database Setup:**
-    - Run Prisma migrations to create the database schema:
-      ```bash
-      npx prisma migrate dev
-      ```
-    - (Optional) Seed the database if seed scripts are available:
-      ```bash
-      npx prisma db seed
-      ```
+4. Database
 
-## Running the Application
+```bash
+npx prisma migrate dev
+npx prisma generate
+```
 
-1.  **Development Mode:**
+5. Run
 
-    - Starts the server with hot-reloading using `ts-node-dev` or similar.
+```bash
+npm run dev   # development
+npm run build && npm start   # production
+```
 
-    ```bash
-    npm run dev
-    ```
+Server runs at `http://localhost:3000` by default.
 
-2.  **Build for Production:**
 
-    - Compiles TypeScript to JavaScript in the `dist` directory.
+## Usage/Examples
 
-    ```bash
-    npm run build
-    ```
+This app uses cookie-based sessions and CSRF protection. Obtain a CSRF token, then include it in subsequent state-changing requests along with the session cookie.
 
-3.  **Start Production Server:**
-    - Runs the compiled JavaScript code. Ensure `.env` variables are available in the production environment.
-    ```bash
-    npm start
-    ```
 
-The server will typically be available at `http://localhost:PORT` (replace `PORT` with the value from your `.env` file).
+#### 1) Get CSRF token
 
-## API Endpoints
+Using curl:
 
-_(Provide a summary of the main API endpoints. This might require reviewing the `src/routes/` directory)_
+```bash
+curl -i -c cookies.txt http://localhost:3000/api/auth/csrf-token
+```
 
-- **`POST /api/auth/register`**: Register a new user.
-  - Body: `{ name: string, email: string, password: string }`
-- **`POST /api/auth/login`**: Log in an existing user.
-  - Body: `{ email: string, password: string }`
-  - Returns: `{ accessToken: string }`
-- **`GET /api/auth/verify-email/:token`**: Verify user's email address.
-- **`POST /api/auth/forgot-password`**: Request a password reset email.
-  - Body: `{ email: string }`
-- **`POST /api/auth/reset-password/:token`**: Set a new password using a reset token.
-  - Body: `{ password: string }`
-- **`GET /api/users/me`** (Example protected route): Get current user details.
-  - Requires `Authorization: Bearer <accessToken>` header.
+Using HTTP client:
 
-_(Add more endpoints as needed)_
+```http
+GET /api/auth/csrf-token
+Content-Type: application/json
+```
 
-## Security Considerations
+Response(200):
 
-- **Password Hashing:** Argon2id is used for strong, salted password hashing.
-- **Rate Limiting:** Applied to sensitive endpoints like login and password reset requests to prevent brute-force attacks.
-- **Input Validation:** Ensure all incoming data is validated (e.g., using Zod) to prevent injection attacks and ensure data integrity.
-- **HTTPS:** Always run the application behind HTTPS in production.
-- **Helmet:** Consider using the `helmet` middleware for setting various security-related HTTP headers.
-- **CSRF Protection:** Implement CSRF protection if using cookie-based sessions alongside or instead of JWTs in headers.
-- **Dependency Updates:** Regularly update dependencies to patch known vulnerabilities.
+```http
+Set-Cookie: connect.sid=...
+Content-Type: application/json
+```
+
+```json
+{
+    "csrfToken": "<csrf-token>"
+}
+```
+
+> [!NOTE]
+> In subsequent requests,
+> Use `<csrf-token>` as the `X-CSRF-Token` header
+> Use value of `Set-Cookie` as `Cookie` header
+
+#### 2) Register
+
+Using curl:
+
+```bash
+curl -i -b cookies.txt -c cookies.txt \
+  -H "Content-Type: application/json" \
+  -H "X-CSRF-Token: <csrf-token>" \
+  -d '{"email":"user@example.com","password":"Password123!"}' \
+  http://localhost:3000/api/auth/register
+```
+
+Using HTTP client:
+
+```http
+POST /api/auth/register
+Content-Type: application/json
+X-CSRF-Token: <csrf-token>
+Cookie: connect.sid=<session-cookie>
+```
+
+```json
+{
+  "email": "user@example.com",
+  "password": "Password123!"
+}
+```
+
+Response(201 Created):
+
+```json
+{
+  "status": "success",
+  "message": "Registration successful. Please check your email to verify your account."
+}
+```
+
+> [!NOTE]
+> Email sending is not yet implemented. For now, the verification token is logged to the server console for testing.
+
+#### 3) Verify email
+
+Using curl:
+
+```bash
+curl -i http://localhost:3000/api/auth/verify/<verification-token>
+```
+
+Using HTTP client:
+
+```http
+GET /api/auth/register
+Content-Type: application/json
+X-CSRF-Token: <csrf-token>
+Cookie: connect.sid=<session-cookie>
+```
+
+Response(200 OK):
+
+```json
+{
+  "status": "success",
+  "message": "Email verified successfully."
+}
+```
+
+#### 4) Login
+
+Using curl:
+
+```bash
+curl -i -b cookies.txt -c cookies.txt \
+  -H "Content-Type: application/json" \
+  -H "X-CSRF-Token: <csrf-token>" \
+  -d '{"email":"user@example.com","password":"Password123!"}' \
+  http://localhost:3000/api/auth/login
+```
+
+Using HTTP client:
+
+```http
+POST /api/auth/login
+Content-Type: application/json
+X-CSRF-Token: <csrf-token>
+Cookie: connect.sid=<session-cookie>
+```
+
+```json
+{
+  "email": "user@example.com",
+  "password": "Password123!"
+}
+```
+
+Response(200 OK):
+
+```json
+{
+  "status": "success",
+  "message": "Login successful"
+}
+```
+
+> [!NOTE]
+> Returns "mfa_required" for users with MFA enabled.
+
+#### 5) Enable MFA (after login). Step 1: generate QR
+
+Using curl:
+
+```bash
+curl -i -b cookies.txt -c cookies.txt \
+  -H "X-CSRF-Token: <csrf-token>" \
+  -X POST http://localhost:3000/api/mfa/setup
+```
+
+Using HTTP client:
+
+```http
+POST /api/mfa/setup
+Content-Type: application/json
+X-CSRF-Token: <csrf-token>
+Cookie: connect.sid=<session-cookie>
+```
+
+Response(200 OK):
+
+```json
+{
+  "status": "success",
+  "data": {
+    "qrCodeDataUrl": "data:image/png;base64,..."
+  }
+}
+```
+
+> [!NOTE]
+> Scan the returned QR code with an authenticator app (e.g., Google Authenticator) to link your account.
+
+#### 6) Verify MFA with TOTP (returns backup codes)
+
+Using curl:
+
+```bash
+curl -i -b cookies.txt -c cookies.txt \
+  -H "Content-Type: application/json" \
+  -H "X-CSRF-Token: <csrf-token>" \
+  -d '{"token":"<totp-code>"}' \
+  http://localhost:3000/api/mfa/verify
+```
+
+Using HTTP client:
+
+```http
+POST /api/mfa/verify
+Content-Type: application/json
+X-CSRF-Token: <csrf-token>
+Cookie: connect.sid=<session-cookie>
+```
+
+```json
+{
+  "token": "<totp-code>"
+}
+```
+
+Response(200 OK):
+
+```json
+{
+  "status": "success",
+  "message": "MFA enabled successfully. Save your backup codes!",
+  "data": {
+    "backupCodes": [ ... ]
+  }
+}
+```
+
+#### 7a) Login with MFA: verify TOTP using the temporary mfaToken
+
+Using curl:
+
+```bash
+curl -i -b cookies.txt -c cookies.txt \
+  -H "Content-Type: application/json" \
+  -H "X-CSRF-Token: <csrf-token>" \
+  -d '{"mfaToken":"<mfaToken>","totpCode":"<totp-code>"}' \
+  http://localhost:3000/api/auth/login/mfa
+```
+
+Using HTTP client:
+
+```http
+POST /api/auth/login/mfa
+Content-Type: application/json
+X-CSRF-Token: <csrf-token>
+Cookie: connect.sid=<session-cookie>
+```
+
+```json
+{
+  "mfaToken": "<mfaToken>",
+  "totpCode": "<totp-code>"
+}
+```
+
+Response(200 OK):
+
+```json
+{
+  "status": "success",
+  "message": "Login successful"
+}
+```
+
+> [!NOTE]
+> The `mfaToken` is returned in the response of `/api/auth/login` when MFA is enabled.
+
+#### 7b) Login with backup code
+
+Using curl:
+
+```bash
+curl -i -b cookies.txt -c cookies.txt \
+  -H "Content-Type: application/json" \
+  -H "X-CSRF-Token: <csrf-token>" \
+  -d '{"mfaToken":"<mfaToken>","backupCode":"<backup-code>"}' \
+  http://localhost:3000/api/auth/login/backup
+```
+
+Using HTTP client:
+
+```http
+POST /api/auth/login/backup
+Content-Type: application/json
+X-CSRF-Token: <csrf-token>
+Cookie: connect.sid=<session-cookie>
+```
+
+```json
+{
+  "mfaToken": "<mfaToken>",
+  "backupCode": "<backup-code>"
+}
+```
+
+Response(200 OK):
+
+```json
+{
+  "status": "success",
+  "message": "Login successful"
+}
+```
+
+> [!NOTE]
+> The `mfaToken` is returned in the response of `/api/auth/login` when MFA is enabled.
+
+#### 8) Logout
+
+Using curl:
+
+```bash
+curl -i -b cookies.txt -c cookies.txt \
+  -H "X-CSRF-Token: <csrf-token>" \
+  -X POST http://localhost:3000/api/auth/logout
+```
+
+Using HTTP client:
+
+```http
+POST /api/auth/logout
+Content-Type: application/json
+X-CSRF-Token: <csrf-token>
+Cookie: connect.sid=<session-cookie>
+```
+
+Response(200 OK):
+
+```json
+{
+  "status": "success",
+  "message": "Logout successful"
+}
+```
+
+> [!NOTE]
+> For testing purposes, the server logs the `userID` and the `sessionID` when the user logs out.
+
+
+## API Routes / Endpoints
+
+Base URL: `http://localhost:3000`
+
+- `GET /api/auth/csrf-token` – get CSRF token
+- `POST /api/auth/register` – body: `{ email, password }`
+- `GET /api/auth/verify/:token` – verify email
+- `POST /api/auth/login` – body: `{ email, password }`
+- `POST /api/auth/login/mfa` – body: `{ mfaToken, totpCode }`
+- `POST /api/auth/login/backup` – body: `{ mfaToken, backupCode }`
+- `POST /api/auth/forgot-password` – body: `{ email }` (always returns 200)
+- `POST /api/auth/reset-password` – body: `{ token, password }`
+- `POST /api/auth/logout` – requires authenticated session
+
+MFA (requires authenticated session):
+
+- `POST /api/mfa/setup` – returns QR code data URL
+- `POST /api/mfa/verify` – body: `{ token }`, returns backup codes
+
+## Security Measures / Best Practices Followed
+
+- **Argon2id password hashing**; progressive rehash from bcrypt on successful login
+- **Single-use, expiring tokens** for email verification and password reset
+- **Sessions in DB** with `connect-pg-simple`; cookies set `httpOnly`, `sameSite=lax`, `secure` in production
+- **CSRF protection** via `csurf` and a dedicated token endpoint
+- **Encrypted MFA secret** at rest using AES-256-GCM with a 32-byte key
+- **Backup codes hashed** (bcrypt) and marked used after successful login
+- **Input validation** everywhere using Zod and a shared `validate` middleware
+- **Rate limiting** applied globally
+- **Transactional operations** for critical multi-step DB changes
+- **Email enumeration protection** on password reset request
+
+## Known Issues / Limitations
+
+- Email sending is currently a placeholder (tokens are logged/returned for testing).
+- Time synchronization matters for TOTP; allow small window but clients should keep clocks accurate.
+- No endpoints yet to disable MFA or rotate backup codes.
+- Ensure `MFA_ENCRYPTION_KEY` is valid (64 hex chars) or MFA setup will fail.
+
+## Contributing
+
+PRs are welcome. Please keep code typed, validated at boundaries, and add tests where reasonable.
+
+## License
+
+ISC

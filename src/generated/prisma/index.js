@@ -162,7 +162,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "C:\\Projects\\iMotive\\auth-system\\src\\generated\\prisma",
+      "value": "C:\\Projects\\Working\\iMotive\\auth-system\\src\\generated\\prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -176,7 +176,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\Projects\\iMotive\\auth-system\\prisma\\schema.prisma",
+    "sourceFilePath": "C:\\Projects\\Working\\iMotive\\auth-system\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
