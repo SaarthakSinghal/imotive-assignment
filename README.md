@@ -68,9 +68,9 @@ auth-system/
 
 2. Install
 
-```bash
-npm install
-```
+    ```bash
+    npm install
+    ```
 
 3. Environment
 
