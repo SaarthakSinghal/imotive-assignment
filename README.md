@@ -316,7 +316,7 @@ Response(200 OK):
   "status": "success",
   "message": "MFA enabled successfully. Save your backup codes!",
   "data": {
-    "backupCodes": [ 10 backup codes ]
+    "backupCodes": <List of 10 backup codes>
   }
 }
 ```
