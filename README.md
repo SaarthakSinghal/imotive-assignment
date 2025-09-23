@@ -1,22 +1,21 @@
-## Auth System
+
+# Auth System
 
 Robust authentication service with sessions, email verification, password resets, and MFA (TOTP + backup codes). Built with Express, TypeScript, and Prisma on PostgreSQL.
 
 ## Tech Stack
-
-- **Language**: TypeScript (Node.js)
-- **Framework**: Express 5
-- **Database**: PostgreSQL (Prisma ORM)
-- **Auth/session**: express-session + connect-pg-simple (DB-backed sessions)
-- **Crypto**: argon2 (argon2id), bcrypt (for legacy/backup codes)
-- **Validation**: Zod
-- **Rate limiting**: express-rate-limit
-- **2FA (TOTP)**: speakeasy, qrcode
-- **CSRF**: csurf
-
+  - **Language**: TypeScript (Node.js)
+  - **Framework**: Express 5
+  - **Database**: PostgreSQL (Prisma ORM)
+  - **Auth/session**: express-session + connect-pg-simple (DB-backed sessions)
+  - **Crypto**: argon2 (argon2id), bcrypt (for legacy/backup codes)
+  - **Validation**: Zod
+  - **Rate limiting**: express-rate-limit
+  - **2FA (TOTP)**: speakeasy, qrcode
+  - **CSRF**: csurf
 ## Features
 
-- **Email/password auth** with Argon2id hashing and progressive rehash from bcrypt
+- **Email/password auth** with `Argon2id` hashing and progressive rehash from `bcrypt`
 - **Email verification** via single-use token before login is allowed
 - **Password reset** with single-use token and one-hour expiry
 - **MFA (TOTP)** enable/verify flow with AES-256-GCM encrypted TOTP secret
@@ -25,48 +24,47 @@ Robust authentication service with sessions, email verification, password resets
 - **CSRF protection** for state-changing requests
 - **Global rate limiting** to reduce brute-force/abuse
 - **Strong input validation** with clear error responses
+##  Project Structure
 
-## Project Tree Structure
 
-```
-auth-system/
-├── prisma/
-│   ├── schema.prisma
-│   └── migrations/
-├── src/
-│   ├── config/
-│   │   ├── index.ts
-│   │   └── session.config.ts
-│   ├── controllers/
-│   │   ├── auth.controller.ts
-│   │   └── mfa.controller.ts
-│   ├── generated/
-│   │   └── prisma/ ...
-│   ├── middleware/
-│   │   ├── auth.middleware.ts
-│   │   └── validate.ts
-│   ├── routes/
-│   │   ├── auth.routes.ts
-│   │   └── mfa.routes.ts
-│   ├── services/
-│   │   ├── auth.service.ts
-│   │   └── mfa.service.ts
-│   ├── utils/
-│   │   └── validators.ts
-│   └── index.ts
-├── package.json
-├── tsconfig.json
-└── README.md
-```
-
-## Installation & Setup
+  ```
+  auth-system/
+  ├── prisma/
+  │   ├── schema.prisma
+  │   └── migrations/
+  ├── src/
+  │   ├── config/
+  │   │   ├── index.ts
+  │   │   └── session.config.ts
+  │   ├── controllers/
+  │   │   ├── auth.controller.ts
+  │   │   └── mfa.controller.ts
+  │   ├── generated/
+  │   │   └── prisma/ ...
+  │   ├── middleware/
+  │   │   ├── auth.middleware.ts
+  │   │   └── validate.ts
+  │   ├── routes/
+  │   │   ├── auth.routes.ts
+  │   │   └── mfa.routes.ts
+  │   ├── services/
+  │   │   ├── auth.service.ts
+  │   │   └── mfa.service.ts
+  │   ├── utils/
+  │   │   └── validators.ts
+  │   └── index.ts
+  ├── package.json
+  ├── tsconfig.json
+  └── README.md
+  ```
+## Installation
 
 1. Prerequisites
 
     - Node.js 18+
     - PostgreSQL (DATABASE_URL)
 
-2. Install
+2. Install npm dependencies
 
     ```bash
     npm install
@@ -75,36 +73,53 @@ auth-system/
 3. Environment
 
     Create `.env` with:
-    
-    ```
-    DATABASE_URL=postgres://user:pass@host:5432/db
-    JWT_SECRET=change_me
-    SESSION_SECRET=change_me
-    MFA_ENCRYPTION_KEY=<64 hex chars (32 bytes)>  # required for AES-256-GCM
+
+    ```env
+    DATABASE_URL=postgres://<username>:<password>@<db_host>:<db_port>/<db_name>
+    JWT_SECRET=<change_me>
+    SESSION_SECRET=<change_me>
+    MFA_ENCRYPTION_KEY=<64 hex chars (32 bytes)>
     PORT=3000
     ```
-    
+
     Notes:
-    
+
     - `MFA_ENCRYPTION_KEY` must be exactly 32 bytes (64 hex characters) or MFA setup will fail.
+
+    **If using Docker for PostgreSQL**
+
+    While configuring the database in Docker, name the environment variables as:
+    - `POSTGRES_USER`=<username>
+    - `POSTGRES_PASSWORD`=<password>
+    - (optional) `POSTGRES_DB`=<db_name> (defaults to same as `POSTGRES_USER`)
+
+    Run the container:
+
+    ```bash
+    docker run --name <db_name> \
+      -e POSTGRES_USER=<username> \
+      -e POSTGRES_PASSWORD=<password> \
+      -p <db_port>:<db_port> \
+      -d postgres
+    ```
+
+    Then update your `.env` file with the above credentials.
 
 4. Database
 
     ```bash
-    npx prisma migrate dev
-    npx prisma generate
+    npx prisma migrate dev      # applies migrations and creates the database schema
+    npx prisma generate         # generates the Prisma client
     ```
 
 5. Run
 
     ```bash
-    npm run dev   # development
+    npm run dev                  # development
     npm run build && npm start   # production
     ```
-    
+
     Server runs at `http://localhost:3000` by default.
-
-
 ## Usage/Examples
 
 This app uses cookie-based sessions and CSRF protection. Obtain a CSRF token, then include it in subsequent state-changing requests along with the session cookie.
@@ -321,7 +336,7 @@ Response(200 OK):
 }
 ```
 
-#### 7A) Login with MFA: verify TOTP using the temporary mfaToken
+#### 7a) Login with MFA: verify TOTP using the temporary mfaToken
 
 Using curl:
 
@@ -361,7 +376,7 @@ Response(200 OK):
 > [!NOTE]
 > The `mfaToken` is returned in the response of `/api/auth/login` when MFA is enabled.
 
-#### 7B) Login with backup code
+#### 7b) Login with backup code
 
 Using curl:
 
@@ -431,8 +446,6 @@ Response(200 OK):
 
 > [!NOTE]
 > For testing purposes, the server logs the `userID` and the `sessionID` when the user logs out.
-
-
 ## API Routes / Endpoints
 
 Base URL: `http://localhost:3000`
@@ -451,21 +464,19 @@ MFA (requires authenticated session):
 
 - `POST /api/mfa/setup` – returns QR code data URL
 - `POST /api/mfa/verify` – body: `{ token }`, returns backup codes
-
 ## Security Measures / Best Practices Followed
 
-- **Argon2id password hashing**; progressive rehash from bcrypt on successful login
+- **`Argon2id` password hashing** progressive rehash from `bcrypt` on successful login
 - **Single-use, expiring tokens** for email verification and password reset
 - **Sessions in DB** with `connect-pg-simple`; cookies set `httpOnly`, `sameSite=lax`, `secure` in production
 - **CSRF protection** via `csurf` and a dedicated token endpoint
 - **Encrypted MFA secret** at rest using AES-256-GCM with a 32-byte key
-- **Backup codes hashed** (bcrypt) and marked used after successful login
+- **Backup codes hashed** (`bcrypt`) and marked used after successful login
 - **Input validation** everywhere using Zod and a shared `validate` middleware
 - **Rate limiting** applied globally
 - **Transactional operations** for critical multi-step DB changes
 - **Email enumeration protection** on password reset request
-
-## Known Issues / Limitations
+## Knows Issues / Limitations
 
 - Email sending is currently a placeholder (tokens are logged/returned for testing).
 - Time synchronization matters for TOTP; allow small window but clients should keep clocks accurate.
@@ -474,8 +485,11 @@ MFA (requires authenticated session):
 
 ## Contributing
 
-PRs are welcome. Please keep code typed, validated at boundaries, and add tests where reasonable.
+Contributions are always welcome!
+
+Please keep code typed, validated at boundaries, and add tests where reasonable.
+
 
 ## License
 
-This project is licensed under the MIT License – see the [LICENSE](./LICENSE) file for details.
+[MIT](https://choosealicense.com/licenses/mit/)
